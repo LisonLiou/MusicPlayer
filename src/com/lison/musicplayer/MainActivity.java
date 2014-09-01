@@ -1,6 +1,7 @@
 package com.lison.musicplayer;
 
-import java.io.File;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -24,7 +25,6 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -39,15 +39,9 @@ public class MainActivity extends ActionBarActivity {
 		setContentView(R.layout.activity_main);
 
 		actionBar = getSupportActionBar();
-
 		listViewMusic = (ListView) super.findViewById(R.id.listViewMusicList);
 
-		File file = new File("/mnt/sdcard/我的下载/浏览器/声音/");
-		if (file.exists()) {
-			BindList(file);
-		} else {
-			Toast.makeText(MainActivity.this, "SD Card doest not exist", Toast.LENGTH_SHORT).show();
-		}
+		BindList();
 	}
 
 	@Override
@@ -134,7 +128,7 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	// 绑定ListView
-	void BindList(File file) {
+	void BindList() {
 
 		// http://blog.csdn.net/zhang31jian/article/details/21231467
 		String whereCondition = "mime_type in ('audio/mpeg','audio/x-ms-wma') and bucket_display_name <> 'audio' and is_music > 0 ";
@@ -143,7 +137,7 @@ public class MainActivity extends ActionBarActivity {
 		String[] displayColumns = { "title", "duration", "artist", "album", "displayName", "data", "albumCover" };
 		int[] displayControls = { R.id.textView1, R.id.textView2, R.id.textView3, R.id.textView4, R.id.textView5, R.id.textView6, R.id.imageView1 };
 
-		Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, sourceColumns, whereCondition, null, null);
+		Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, sourceColumns, whereCondition, null, "_id desc");
 
 		while (cursor.moveToNext()) {
 			Log.i("MEDIA----------", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
@@ -155,11 +149,9 @@ public class MainActivity extends ActionBarActivity {
 
 			Log.i("MEDIA**********", albumCover == null ? String.valueOf(R.drawable.album_default_cover) : albumCover.toString());
 
-			
-			
 			HashMap<String, Object> hash1 = new HashMap<String, Object>();
 			hash1.put("title", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-			hash1.put("duration", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION)));
+			hash1.put("duration", getDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))));
 			hash1.put("artist", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
 			hash1.put("_id", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
 
@@ -173,20 +165,36 @@ public class MainActivity extends ActionBarActivity {
 
 		SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, hashMusicList, R.layout.music_list, displayColumns, displayControls);
 		listViewMusic.setAdapter(adapter);
-		
-		adapter.setViewBinder(new ViewBinder(){
+
+		adapter.setViewBinder(new ViewBinder() {
 
 			@Override
 			public boolean setViewValue(View view, Object data, String textRepresentation) {
 				// TODO Auto-generated method stub
-				if(view instanceof ImageView && data instanceof Drawable){
-                    ImageView iv=(ImageView)view;
-                    iv.setImageDrawable((Drawable)data);
-                    return true;
-                }
-                else return false;
-			}			
+				if (view instanceof ImageView && data instanceof Drawable) {
+					ImageView iv = (ImageView) view;
+					iv.setImageDrawable((Drawable) data);
+					return true;
+				} else
+					return false;
+			}
 		});
+	}
+
+	/**
+	 * 
+	 * 根据int时长获取时长：02:33
+	 * 
+	 * @param d
+	 * @return
+	 */
+	private String getDuration(int d) {
+
+		double f = d / 1000.00 / 60.00;
+		BigDecimal b = new BigDecimal(f);
+		double f1 = b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+
+		return String.valueOf(f1);
 	}
 
 	/**

@@ -3,10 +3,6 @@ package com.object;
 import java.io.File;
 import java.io.IOException;
 
-import org.cmc.music.metadata.IMusicMetadata;
-import org.cmc.music.metadata.MusicMetadataSet;
-import org.cmc.music.myid3.MyID3;
-
 import android.util.Log;
 
 public class Song {
