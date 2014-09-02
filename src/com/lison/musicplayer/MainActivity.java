@@ -1,19 +1,12 @@
 package com.lison.musicplayer;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
-import android.database.Cursor;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -26,11 +19,14 @@ import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 import android.widget.TextView;
 
+import com.content.provider.MusicProvider;
+
 public class MainActivity extends ActionBarActivity {
 
-	private ActionBar actionBar;
+	// Music ArrayList
 	private ArrayList<HashMap<String, Object>> hashMusicList = new ArrayList<HashMap<String, Object>>();
 
+	// Music ListView
 	private ListView listViewMusic;
 
 	@Override
@@ -38,10 +34,9 @@ public class MainActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
-		actionBar = getSupportActionBar();
 		listViewMusic = (ListView) super.findViewById(R.id.listViewMusicList);
 
-		BindList();
+		bindList();
 	}
 
 	@Override
@@ -127,43 +122,21 @@ public class MainActivity extends ActionBarActivity {
 		}
 	}
 
-	// 绑定ListView
-	void BindList() {
+	/**
+	 * 绑定MusicListView
+	 * 
+	 */
+	void bindList() {
 
 		// http://blog.csdn.net/zhang31jian/article/details/21231467
-		String whereCondition = "mime_type in ('audio/mpeg','audio/x-ms-wma') and bucket_display_name <> 'audio' and is_music > 0 ";
-		String[] sourceColumns = { MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DURATION, MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media._ID,
-				MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.DISPLAY_NAME, MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID, };
-		String[] displayColumns = { "title", "duration", "artist", "album", "displayName", "data", "albumCover" };
+
+		MusicProvider musicProvider = new MusicProvider(this);
+		hashMusicList = musicProvider.getAllMusic();
+
 		int[] displayControls = { R.id.textView1, R.id.textView2, R.id.textView3, R.id.textView4, R.id.textView5, R.id.textView6, R.id.imageView1 };
 
-		Cursor cursor = getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, sourceColumns, whereCondition, null, "_id desc");
-
-		while (cursor.moveToNext()) {
-			Log.i("MEDIA----------", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-			Log.i("MEDIA>>>>>>>>>>", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-
-			Drawable albumCover = Drawable.createFromPath(getAlbumArt(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))));
-			if (albumCover == null)
-				albumCover = getResources().getDrawable(R.drawable.album_default_cover);
-
-			Log.i("MEDIA**********", albumCover == null ? String.valueOf(R.drawable.album_default_cover) : albumCover.toString());
-
-			HashMap<String, Object> hash1 = new HashMap<String, Object>();
-			hash1.put("title", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
-			hash1.put("duration", getDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))));
-			hash1.put("artist", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
-			hash1.put("_id", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
-
-			hash1.put("album", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
-			hash1.put("displayName", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)));
-			hash1.put("data", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
-			hash1.put("albumCover", albumCover);
-
-			hashMusicList.add(hash1);
-		}
-
-		SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, hashMusicList, R.layout.music_list, displayColumns, displayControls);
+		SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, hashMusicList, R.layout.music_list, musicProvider.getMusicListDisplayColumnDefault(),
+				displayControls);
 		listViewMusic.setAdapter(adapter);
 
 		adapter.setViewBinder(new ViewBinder() {
@@ -181,40 +154,4 @@ public class MainActivity extends ActionBarActivity {
 		});
 	}
 
-	/**
-	 * 
-	 * 根据int时长获取时长：02:33
-	 * 
-	 * @param d
-	 * @return
-	 */
-	private String getDuration(int d) {
-
-		double f = d / 1000.00 / 60.00;
-		BigDecimal b = new BigDecimal(f);
-		double f1 = b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-
-		return String.valueOf(f1);
-	}
-
-	/**
-	 * 
-	 * 功能 通过album_id查找 album_art 如果找不到返回null
-	 * 
-	 * @param album_id
-	 * @return album_art
-	 */
-	private String getAlbumArt(int album_id) {
-		String mUriAlbums = "content://media/external/audio/albums";
-		String[] projection = new String[] { "album_art" };
-		Cursor cur = this.getContentResolver().query(Uri.parse(mUriAlbums + "/" + Integer.toString(album_id)), projection, null, null, null);
-		String album_art = null;
-		if (cur.getCount() > 0 && cur.getColumnCount() > 0) {
-			cur.moveToNext();
-			album_art = cur.getString(0);
-		}
-		cur.close();
-		cur = null;
-		return album_art;
-	}
 }
