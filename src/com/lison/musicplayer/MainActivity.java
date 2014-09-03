@@ -7,8 +7,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,12 +33,16 @@ public class MainActivity extends ActionBarActivity {
 	// ListView文件列表控件
 	private ListView listViewMusic;
 
+	// Support ActionBar
+	private ActionBar actionBar;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
 		listViewMusic = (ListView) super.findViewById(R.id.listViewMusicList);
+		actionBar = super.getSupportActionBar();
 
 		// 绑定文件列表
 		bindList();
@@ -50,15 +54,6 @@ public class MainActivity extends ActionBarActivity {
 				// TODO Auto-generated method stub
 
 				HashMap<String, Object> selected = (HashMap<String, Object>) hashMusicList.get(position);
-
-				Log.i("listmusic------->", selected.get("_id").toString());
-				Log.i("listmusic------->", selected.get("title").toString());
-				Log.i("listmusic------->", selected.get("duration").toString());
-				Log.i("listmusic------->", selected.get("artist").toString());
-				Log.i("listmusic------->", selected.get("album").toString());
-				Log.i("listmusic------->", selected.get("displayName").toString());
-				Log.i("listmusic------->", selected.get("data").toString());
-				Log.i("listmusic------->", selected.get("albumCover").toString());
 
 				Intent intentPlay = new Intent();
 				intentPlay.putExtra("musicId", selected.get("_id").toString());
@@ -133,9 +128,9 @@ public class MainActivity extends ActionBarActivity {
 			if (arg1 == null) {
 				arg1 = inflater.inflate(R.layout.music_list, null);
 				holder = new ViewHolder();
-				holder.txtId = (TextView) arg1.findViewById(R.id.textView1);
-				holder.txtDeviceIp = (TextView) arg1.findViewById(R.id.textView2);
-				holder.txtDeviceName = (TextView) arg1.findViewById(R.id.textView3);
+//				holder.txtId = (TextView) arg1.findViewById(R.id.textView1);
+//				holder.txtDeviceIp = (TextView) arg1.findViewById(R.id.textView2);
+//				holder.txtDeviceName = (TextView) arg1.findViewById(R.id.textView3);
 
 				arg1.setTag(holder);
 			} else {
@@ -162,7 +157,8 @@ public class MainActivity extends ActionBarActivity {
 		MusicProvider musicProvider = new MusicProvider(this);
 		hashMusicList = musicProvider.getAllMusic();
 
-		int[] displayControls = { 0, R.id.textView1, R.id.textView2, R.id.textView3, R.id.textView4, R.id.textView5, R.id.textView6, R.id.imageView1 };
+		int[] displayControls = { 0, R.id.textViewMusicTitle, R.id.textViewMusicDuration, R.id.textViewMusicAuthor, R.id.textViewAlbumName,
+				R.id.textViewFileDisplayName, R.id.textViewFileAbsolutePath, R.id.imageViewAlbumCover };
 
 		SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, hashMusicList, R.layout.music_list, MusicProvider.getMusicListDisplayColumnDefault(),
 				displayControls);

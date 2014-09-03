@@ -28,11 +28,11 @@ public class MusicHelper {
 	 */
 	public String getDuration(int d) {
 
-		double f = d / 1000.00 / 60.00;
-		BigDecimal b = new BigDecimal(f);
-		double f1 = b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
-
-		return String.valueOf(f1);
+		 double f = d / 1000.00 / 60.00;
+		 BigDecimal b = new BigDecimal(f);
+		 double f1 = b.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+		
+		 return String.valueOf(f1);
 	}
 
 	/**

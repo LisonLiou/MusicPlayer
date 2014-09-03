@@ -93,4 +93,41 @@ public class MusicProvider {
 
 		return hashMusicList;
 	}
+
+	/**
+	 * 获取指定的音乐明细
+	 * 
+	 * @param musicId
+	 * @return
+	 */
+	public HashMap<String, Object> getMusicDetail(int musicId) {
+		Cursor cursor = _context.getContentResolver().query(MUSIC_CONTENT_URI, MUSIC_LIST_SOURCE_COLUMN_DEFAULT, "_id=?",
+				new String[] { String.valueOf(musicId) }, MUSIC_LIST_SORT_ORDER_DEFAULT);
+
+		MusicHelper musicHelper = new MusicHelper(_context);
+
+		while (cursor.moveToNext()) {
+
+			Drawable albumCover = Drawable
+					.createFromPath(musicHelper.getAlbumArt(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))));
+			if (albumCover == null)
+				albumCover = _context.getResources().getDrawable(R.drawable.album_default_cover);
+
+			HashMap<String, Object> hash1 = new HashMap<String, Object>();
+			hash1.put("_id", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+			hash1.put("title", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
+			hash1.put("duration", musicHelper.getDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))));
+			hash1.put("artist", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));
+			hash1.put("_id", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+
+			hash1.put("album", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
+			hash1.put("displayName", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)));
+			hash1.put("data", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+			hash1.put("albumCover", albumCover);
+
+			return hash1;
+		}
+
+		return null;
+	}
 }
