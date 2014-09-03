@@ -8,6 +8,9 @@ import android.net.Uri;
 
 public class MusicHelper {
 
+	// 音樂封面Content Uri
+	private static final String MUSIC_ALBUMS_CONTENT_URI_STRING = "content://media/external/audio/albums";
+
 	// 当前调用源的上下文句柄对象
 	private Context _context;
 
@@ -40,9 +43,10 @@ public class MusicHelper {
 	 * @return album_art
 	 */
 	public String getAlbumArt(int album_id) {
-		String mUriAlbums = "content://media/external/audio/albums";
+
 		String[] projection = new String[] { "album_art" };
-		Cursor cur = _context.getContentResolver().query(Uri.parse(mUriAlbums + "/" + Integer.toString(album_id)), projection, null, null, null);
+		Cursor cur = _context.getContentResolver().query(Uri.parse(MUSIC_ALBUMS_CONTENT_URI_STRING + "/" + Integer.toString(album_id)), projection, null, null,
+				null);
 		String album_art = null;
 		if (cur.getCount() > 0 && cur.getColumnCount() > 0) {
 			cur.moveToNext();

@@ -26,7 +26,7 @@ public class MusicProvider {
 			MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID, };
 
 	// 音乐列表默认显示列
-	public static final String[] MUSIC_LIST_DISPLAY_COLUMN_DEFAULT = { "title", "duration", "artist", "album", "displayName", "data", "albumCover" };
+	public static final String[] MUSIC_LIST_DISPLAY_COLUMN_DEFAULT = { "_id", "title", "duration", "artist", "album", "displayName", "data", "albumCover" };
 
 	// 音乐列表默认排序规则
 	public static final String MUSIC_LIST_SORT_ORDER_DEFAULT = "_id desc";
@@ -77,6 +77,7 @@ public class MusicProvider {
 				albumCover = _context.getResources().getDrawable(R.drawable.album_default_cover);
 
 			HashMap<String, Object> hash1 = new HashMap<String, Object>();
+			hash1.put("_id", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
 			hash1.put("title", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
 			hash1.put("duration", musicHelper.getDuration(cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION))));
 			hash1.put("artist", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST)));

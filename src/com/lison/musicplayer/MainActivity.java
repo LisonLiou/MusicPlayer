@@ -4,14 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -23,10 +27,10 @@ import com.content.provider.MusicProvider;
 
 public class MainActivity extends ActionBarActivity {
 
-	// Music ArrayList
+	// ArrayList文件列表对象
 	private ArrayList<HashMap<String, Object>> hashMusicList = new ArrayList<HashMap<String, Object>>();
 
-	// Music ListView
+	// ListView文件列表控件
 	private ListView listViewMusic;
 
 	@Override
@@ -36,7 +40,32 @@ public class MainActivity extends ActionBarActivity {
 
 		listViewMusic = (ListView) super.findViewById(R.id.listViewMusicList);
 
+		// 绑定文件列表
 		bindList();
+
+		listViewMusic.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+				// TODO Auto-generated method stub
+
+				HashMap<String, Object> selected = (HashMap<String, Object>) hashMusicList.get(position);
+
+				Log.i("listmusic------->", selected.get("_id").toString());
+				Log.i("listmusic------->", selected.get("title").toString());
+				Log.i("listmusic------->", selected.get("duration").toString());
+				Log.i("listmusic------->", selected.get("artist").toString());
+				Log.i("listmusic------->", selected.get("album").toString());
+				Log.i("listmusic------->", selected.get("displayName").toString());
+				Log.i("listmusic------->", selected.get("data").toString());
+				Log.i("listmusic------->", selected.get("albumCover").toString());
+
+				Intent intentPlay = new Intent();
+				intentPlay.putExtra("musicId", selected.get("_id").toString());
+				intentPlay.setClass(MainActivity.this, PlayActivity.class);
+				startActivity(intentPlay);
+			}
+		});
 	}
 
 	@Override
@@ -133,9 +162,9 @@ public class MainActivity extends ActionBarActivity {
 		MusicProvider musicProvider = new MusicProvider(this);
 		hashMusicList = musicProvider.getAllMusic();
 
-		int[] displayControls = { R.id.textView1, R.id.textView2, R.id.textView3, R.id.textView4, R.id.textView5, R.id.textView6, R.id.imageView1 };
+		int[] displayControls = { 0, R.id.textView1, R.id.textView2, R.id.textView3, R.id.textView4, R.id.textView5, R.id.textView6, R.id.imageView1 };
 
-		SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, hashMusicList, R.layout.music_list, musicProvider.getMusicListDisplayColumnDefault(),
+		SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, hashMusicList, R.layout.music_list, MusicProvider.getMusicListDisplayColumnDefault(),
 				displayControls);
 		listViewMusic.setAdapter(adapter);
 
@@ -153,5 +182,4 @@ public class MainActivity extends ActionBarActivity {
 			}
 		});
 	}
-
 }
