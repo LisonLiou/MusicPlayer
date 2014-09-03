@@ -60,6 +60,8 @@ public class MusicHelper {
 				formatter += ":0" + s;
 			} else
 				formatter += ":" + String.valueOf(s);
+		else
+			formatter += ":00";
 
 		return formatter;
 

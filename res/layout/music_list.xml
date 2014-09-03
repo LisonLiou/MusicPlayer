@@ -12,10 +12,12 @@
 
         <ImageView
             android:id="@+id/imageViewAlbumCover"
-            android:layout_width="100dp"
-            android:layout_height="wrap_content"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="4dp"
+            android:background="#00000000"
+            android:scaleType="centerCrop" />
     </LinearLayout>
 
     <LinearLayout

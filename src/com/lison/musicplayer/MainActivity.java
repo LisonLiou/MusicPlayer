@@ -13,10 +13,12 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
@@ -128,9 +130,11 @@ public class MainActivity extends ActionBarActivity {
 			if (arg1 == null) {
 				arg1 = inflater.inflate(R.layout.music_list, null);
 				holder = new ViewHolder();
-//				holder.txtId = (TextView) arg1.findViewById(R.id.textView1);
-//				holder.txtDeviceIp = (TextView) arg1.findViewById(R.id.textView2);
-//				holder.txtDeviceName = (TextView) arg1.findViewById(R.id.textView3);
+				// holder.txtId = (TextView) arg1.findViewById(R.id.textView1);
+				// holder.txtDeviceIp = (TextView)
+				// arg1.findViewById(R.id.textView2);
+				// holder.txtDeviceName = (TextView)
+				// arg1.findViewById(R.id.textView3);
 
 				arg1.setTag(holder);
 			} else {

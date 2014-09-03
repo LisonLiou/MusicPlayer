@@ -63,7 +63,11 @@
 
     <SeekBar
         android:id="@+id/seekBarProgress"
-        android:layout_width="match_parent" />
+        android:layout_width="match_parent"
+        android:layout_marginTop="6dip"
+        android:maxHeight="4dip"
+        android:progressDrawable="@drawable/seekbar_bg"
+        android:thumb="@drawable/seekbar_slide_block" />
 
     <RelativeLayout
         android:layout_gravity="center_vertical"
