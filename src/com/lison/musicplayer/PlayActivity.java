@@ -70,7 +70,7 @@ public class PlayActivity extends ActionBarActivity {
 	public static PLAYER_STATUS currentPlayerStatus = null;
 
 	/**
-	 * 主播放控件
+	 * 媒体播放对象
 	 */
 	public MediaPlayer mediaPlayer = null;
 
@@ -183,31 +183,27 @@ public class PlayActivity extends ActionBarActivity {
 		@Override
 		public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
-			if (!fromUser)
-				return;
+		}
+
+		@Override
+		public void onStartTrackingTouch(SeekBar seekBar) {
+
+		}
+
+		@Override
+		public void onStopTrackingTouch(SeekBar seekBar) {
 
 			if (PlayActivity.this.mediaPlayer != null) {
 
 				Message m = handlerProcess.obtainMessage();
 				m.what = PLAYER_STATUS.PLAYING.value;
 
+				int progress = seekBar.getProgress();
 				PlayActivity.this.mediaPlayer.seekTo(progress);
 				handlerProcess.sendMessage(m);
 				currentDuration = progress;
 				textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
 			}
-		}
-
-		@Override
-		public void onStartTrackingTouch(SeekBar seekBar) {
-			// TODO Auto-generated method stub
-
-		}
-
-		@Override
-		public void onStopTrackingTouch(SeekBar seekBar) {
-			// TODO Auto-generated method stub
-
 		}
 	}
 
@@ -262,16 +258,12 @@ public class PlayActivity extends ActionBarActivity {
 		try {
 			PlayActivity.this.mediaPlayer.setDataSource(path);
 		} catch (IllegalArgumentException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (SecurityException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		PlayActivity.this.mediaPlayer.setOnCompletionListener(new MediaCompletionListener());
@@ -279,10 +271,8 @@ public class PlayActivity extends ActionBarActivity {
 		try {
 			PlayActivity.this.mediaPlayer.prepare();
 		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		PlayActivity.this.mediaPlayer.start();

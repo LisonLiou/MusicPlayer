@@ -38,6 +38,11 @@ public class MainActivity extends ActionBarActivity {
 	// Support ActionBar
 	private ActionBar actionBar;
 
+	/**
+	 * 媒体播放对象
+	 */
+	private MediaPlayer mediaPlayer;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
