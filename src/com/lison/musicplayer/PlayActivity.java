@@ -46,10 +46,16 @@ public class PlayActivity extends ActionBarActivity {
 	// SeekBar
 	private SeekBar seekBarProcess;
 
+	// 音乐助手类
+	private static MusicHelper musicHelper;
+
+	// 當前已播放時長
+	private int currentDuration = 0x00;
+
 	/**
 	 * 播放器状态枚舉（可獲得枚舉對應數字）
 	 */
-	public enum PLAYER_STATUS {
+	public static enum PLAYER_STATUS {
 
 		PLAYING(1), STOPPED(-1), PAUSED(0);
 
@@ -59,7 +65,7 @@ public class PlayActivity extends ActionBarActivity {
 			this.value = value;
 		}
 
-		public int value() {
+		public int getValue() {
 			return this.value;
 		}
 	}
@@ -68,20 +74,6 @@ public class PlayActivity extends ActionBarActivity {
 	 * 当前播放器状态
 	 */
 	public static PLAYER_STATUS currentPlayerStatus = null;
-
-	/**
-	 * 媒体播放对象
-	 */
-	public MediaPlayer mediaPlayer = null;
-
-	// 當前已播放時長
-	private int currentDuration = 0x00;
-
-	// 音乐助手类
-	private static MusicHelper musicHelper;
-
-	// 當前播放的音樂id
-	public static int CurrentPlayMusicId;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -117,12 +109,12 @@ public class PlayActivity extends ActionBarActivity {
 		// 将应用程序图标设置为可点击的按钮,并且在图标上添加向左的箭头，该句代码起到了决定性作用
 		actionBar.setDisplayHomeAsUpEnabled(true);
 
-		// 设置播放器状态为正在播放（默认启动当前Activity就开始播放）
-		currentPlayerStatus = PLAYER_STATUS.PLAYING;
-
 		imageButtonControl = (ImageButton) super.findViewById(R.id.imageButtonControl);
 		// 播放、暂停按钮添加事件
 		imageButtonControl.setOnClickListener(new MyOnClickListener());
+
+		// 设置播放器状态为正在播放（默认启动当前Activity就开始播放）
+		currentPlayerStatus = PLAYER_STATUS.PLAYING;
 
 		// 绑定音乐信息
 		imageViewAlbumCover = (ImageView) super.findViewById(R.id.imageViewAlbumCover);
@@ -136,16 +128,6 @@ public class PlayActivity extends ActionBarActivity {
 		// 獲取傳遞來的數據musicId ： _id
 		Intent intentPlay = super.getIntent();
 		int musicId = Integer.parseInt(intentPlay.getStringExtra("musicId"));
-
-		// if (CurrentPlayMusicId == 0) {
-		PlayActivity.this.mediaPlayer = new MediaPlayer();
-		// } else if (CurrentPlayMusicId != musicId) {
-		// mediaPlayer.stop();
-		// PlayActivity.this.mediaPlayer.release();
-		// PlayActivity.this.mediaPlayer = null;
-		// CurrentPlayMusicId = musicId;
-		// PlayActivity.this.mediaPlayer = new MediaPlayer();
-		// }
 
 		MusicProvider musicProvider = new MusicProvider(this);
 		HashMap<String, Object> musicHash = musicProvider.getMusicDetail(musicId);
@@ -193,14 +175,11 @@ public class PlayActivity extends ActionBarActivity {
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
 
-			if (PlayActivity.this.mediaPlayer != null) {
-
-				Message m = handlerProcess.obtainMessage();
-				m.what = PLAYER_STATUS.PLAYING.value;
+			if (MainActivity.mediaPlayer != null) {
 
 				int progress = seekBar.getProgress();
-				PlayActivity.this.mediaPlayer.seekTo(progress);
-				handlerProcess.sendMessage(m);
+				MainActivity.mediaPlayer.seekTo(progress);
+
 				currentDuration = progress;
 				textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
 			}
@@ -216,10 +195,10 @@ public class PlayActivity extends ActionBarActivity {
 	private class MediaErrorListener implements OnErrorListener {
 		@Override
 		public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
-			PlayActivity.this.mediaPlayer.stop();
-			PlayActivity.this.mediaPlayer.release();
-			PlayActivity.this.mediaPlayer = null;
-			Toast.makeText(PlayActivity.this, "", Toast.LENGTH_SHORT).show();
+			MainActivity.mediaPlayer.stop();
+			MainActivity.mediaPlayer.release();
+			MainActivity.mediaPlayer = null;
+			Toast.makeText(PlayActivity.this, R.string.music_play_not_music_found, Toast.LENGTH_SHORT).show();
 			return false;
 		}
 	}
@@ -234,7 +213,7 @@ public class PlayActivity extends ActionBarActivity {
 		@Override
 		public void onCompletion(MediaPlayer arg0) {
 			Message m = handlerProcess.obtainMessage();
-			m.what = PLAYER_STATUS.STOPPED.value;
+			m.what = PLAYER_STATUS.STOPPED.getValue();
 			handlerProcess.sendMessage(m);
 		}
 	}
@@ -253,10 +232,10 @@ public class PlayActivity extends ActionBarActivity {
 			return;
 		}
 
-		PlayActivity.this.mediaPlayer.reset();
-		PlayActivity.this.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+		MainActivity.mediaPlayer.reset();
+		MainActivity.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 		try {
-			PlayActivity.this.mediaPlayer.setDataSource(path);
+			MainActivity.mediaPlayer.setDataSource(path);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (SecurityException e) {
@@ -266,16 +245,16 @@ public class PlayActivity extends ActionBarActivity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		PlayActivity.this.mediaPlayer.setOnCompletionListener(new MediaCompletionListener());
-		PlayActivity.this.mediaPlayer.setOnErrorListener(new MediaErrorListener());
+		MainActivity.mediaPlayer.setOnCompletionListener(new MediaCompletionListener());
+		MainActivity.mediaPlayer.setOnErrorListener(new MediaErrorListener());
 		try {
-			PlayActivity.this.mediaPlayer.prepare();
+			MainActivity.mediaPlayer.prepare();
 		} catch (IllegalStateException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		PlayActivity.this.mediaPlayer.start();
+		MainActivity.mediaPlayer.start();
 
 		imageViewAlbumCover.setImageDrawable((Drawable) hash.get("albumCover"));
 		textViewTitle.setText(hash.get("title").toString());
@@ -292,18 +271,21 @@ public class PlayActivity extends ActionBarActivity {
 
 		@Override
 		public void handleMessage(Message msg) {
-
-			if (msg.what == PLAYER_STATUS.STOPPED.value) {
+			int controlDrawableId = 0;
+			if (msg.what == PLAYER_STATUS.STOPPED.getValue()) {
+				controlDrawableId = R.drawable.music_player_control_play;
+				MainActivity.mediaPlayer.stop();
 				handlerProcess.removeCallbacks(updateThreadPlaying);
 				textViewCurrentDuration.setText("00:00");
-			} else if (msg.what == PLAYER_STATUS.PAUSED.value) {
-				handlerProcess.removeCallbacks(updateThreadPlaying);
-				PlayActivity.this.mediaPlayer.pause();
+			} else if (msg.what == PLAYER_STATUS.PAUSED.getValue()) {
+				controlDrawableId = R.drawable.music_player_control_play;
+				MainActivity.mediaPlayer.pause();
 			} else {
-				PlayActivity.this.mediaPlayer.start();
+				controlDrawableId = R.drawable.music_player_control_pause;
+				MainActivity.mediaPlayer.start();
 			}
 
-			super.handleMessage(msg);
+			imageButtonControl.setImageResource(controlDrawableId);
 		}
 	};
 
@@ -317,31 +299,20 @@ public class PlayActivity extends ActionBarActivity {
 
 			Message m = handlerProcess.obtainMessage();
 			if (currentDuration <= seekBarProcess.getMax()) {
-				currentDuration += 1000;
-				m.what = PLAYER_STATUS.PLAYING.value;
-				seekBarProcess.incrementProgressBy(1000);
+				if (currentPlayerStatus == PLAYER_STATUS.PLAYING) {
+					currentDuration += 1000;
+					m.what = PLAYER_STATUS.PLAYING.getValue();
+					seekBarProcess.incrementProgressBy(1000);
 
-				textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
+					textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
+				}
 
 			} else {
-				m.what = PLAYER_STATUS.STOPPED.value;
+				m.what = PLAYER_STATUS.STOPPED.getValue();
 			}
 
 			handlerProcess.handleMessage(m);
 			handlerProcess.postDelayed(updateThreadPlaying, 1000);
-		}
-	};
-
-	/**
-	 * 綫程類，停止播放
-	 */
-	Runnable updateThreadStopped = new Runnable() {
-		@Override
-		public void run() {
-			Message m = handlerProcess.obtainMessage();
-			m.what = PLAYER_STATUS.STOPPED.value;
-
-			handlerProcess.handleMessage(m);
 		}
 	};
 
@@ -358,29 +329,24 @@ public class PlayActivity extends ActionBarActivity {
 
 			switch (view.getId()) {
 			case R.id.imageButtonControl: {
-				int controlDrawableId = 0;
+
 				Message m = handlerProcess.obtainMessage();
 				switch (currentPlayerStatus) {
 				case PLAYING:
-					controlDrawableId = R.drawable.music_player_control_play;
 					currentPlayerStatus = PLAYER_STATUS.PAUSED;
-					m.what = PLAYER_STATUS.PAUSED.value;
+					m.what = PLAYER_STATUS.PAUSED.getValue();
 					break;
 				case PAUSED:
-					controlDrawableId = R.drawable.music_player_control_pause;
 					currentPlayerStatus = PLAYER_STATUS.PLAYING;
-					handlerProcess.post(updateThreadPlaying);
-					m.what = PLAYER_STATUS.PLAYING.value;
+					m.what = PLAYER_STATUS.PLAYING.getValue();
 					break;
 				case STOPPED:
-					controlDrawableId = R.drawable.music_player_control_play;
 					currentPlayerStatus = PLAYER_STATUS.PLAYING;
-					m.what = PLAYER_STATUS.PLAYING.value;
+					m.what = PLAYER_STATUS.PLAYING.getValue();
 					break;
 				}
 
 				handlerProcess.sendMessage(m);
-				imageButtonControl.setImageResource(controlDrawableId);
 			}
 				break;
 			}
