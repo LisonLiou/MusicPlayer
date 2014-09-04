@@ -5,6 +5,11 @@ import java.io.IOException;
 
 import android.util.Log;
 
+/**
+ * 未使用此model，哪天有空的时候重构代码，改成OOP
+ * @author Administrator
+ *
+ */
 public class Song {
 
 	private String title;

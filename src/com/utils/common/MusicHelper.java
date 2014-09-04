@@ -1,7 +1,9 @@
 package com.utils.common;
 
-import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
@@ -26,6 +28,7 @@ public class MusicHelper {
 	 * @param d
 	 * @return
 	 */
+	@SuppressLint("SimpleDateFormat")
 	public String getDuration(int d) {
 
 		// //example -:)
@@ -34,36 +37,43 @@ public class MusicHelper {
 		// 6 6.150000 9.000000
 		// m s
 
-		String formatter = "";
+		Date date = new Date(d);
+		SimpleDateFormat sdf = new SimpleDateFormat("mm:ss");
 
-		int m = d / 1000 / 60;
-		int h = m / 60;
-		int s = (int) ((d / 1000 / 60.00 - m) * 60);
+		return sdf.format(date);
 
-		if (h != 0)
-			if (h / 10 == 0) {
-				formatter = "0" + h;
-			} else
-				formatter = String.valueOf(h);
+		// String formatter = "";
 
-		if (formatter != "")
-			formatter += ":";
-
-		if (m != 0)
-			if (m / 10 == 0) {
-				formatter += "0" + m;
-			} else
-				formatter += "" + String.valueOf(m);
-
-		if (s != 0)
-			if (s / 10 == 0) {
-				formatter += ":0" + s;
-			} else
-				formatter += ":" + String.valueOf(s);
-		else
-			formatter += ":00";
-
-		return formatter;
+		// int m = d / 1000 / 60;
+		// int h = m / 60;
+		// int s = (int) ((d / 1000 / 60.00 - m) * 60);
+		//
+		// if (h != 0)
+		// if (h / 10 == 0) {
+		// formatter = "0" + h;
+		// } else
+		// formatter = String.valueOf(h);
+		//
+		// if (formatter != "")
+		// formatter += ":";
+		//
+		// if (m != 0)
+		// if (m / 10 == 0) {
+		// formatter += "0" + m;
+		// } else
+		// formatter += "" + String.valueOf(m);
+		// else
+		// formatter += "00";
+		//
+		// if (s != 0)
+		// if (s / 10 == 0) {
+		// formatter += ":0" + s;
+		// } else
+		// formatter += ":" + String.valueOf(s);
+		// else
+		// formatter += ":00";
+		//
+		// return formatter;
 
 		// B double f = d / 1000.00 / 60.00;
 		// BigDecimal b = new BigDecimal(f);
