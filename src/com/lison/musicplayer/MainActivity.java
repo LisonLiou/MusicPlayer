@@ -25,7 +25,7 @@ import com.service.audio.PlayerService;
 public class MainActivity extends ActionBarActivity {
 
 	// doc ref
-	// http://blog.csdn.net/zzy916853616/article/details/6450753
+	private final String doc_ref = "http://blog.csdn.net/zzy916853616/article/details/6450753";
 
 	// ArrayList文件列表对象（数据源：当前）
 	public static ArrayList<HashMap<String, Object>> hashMusicList = new ArrayList<HashMap<String, Object>>();
