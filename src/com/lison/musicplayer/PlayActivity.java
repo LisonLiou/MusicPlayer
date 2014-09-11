@@ -1,21 +1,16 @@
 package com.lison.musicplayer;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.media.MediaPlayer.OnCompletionListener;
-import android.media.MediaPlayer.OnErrorListener;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
+
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -24,9 +19,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.content.provider.MusicProvider;
+import com.service.audio.PlayerService;
 import com.utils.common.MusicHelper;
 
 public class PlayActivity extends ActionBarActivity {
@@ -124,34 +117,40 @@ public class PlayActivity extends ActionBarActivity {
 		textViewDuration = (TextView) super.findViewById(R.id.textViewDuration);
 		textViewCurrentDuration = (TextView) super.findViewById(R.id.textViewCurrentDuration);
 		musicHelper = new MusicHelper(this);
-
-		// 獲取傳遞來的數據musicId ： _id
-		Intent intentPlay = super.getIntent();
-		int musicId = Integer.parseInt(intentPlay.getStringExtra("musicId"));
-
-		MusicProvider musicProvider = new MusicProvider(this);
-		HashMap<String, Object> musicHash = musicProvider.getMusicDetail(musicId);
-		play(musicHash);
-
 		seekBarProcess = (SeekBar) super.findViewById(R.id.seekBarProcess);
-		// 爲seekBar設置最大長度
-		seekBarProcess.setMax((Integer) musicHash.get("durationMillionSecond"));
-
 		// 綁定SeekBar事件
 		seekBarProcess.setOnSeekBarChangeListener(new MyOnSeekBarChangeListener());
+
+		showAlbum();
 
 		// 线程类压入looper
 		handlerProcess.post(updateThreadPlaying);
 
-		Log.i("musicDetail------->", musicHash.get("_id").toString());
-		Log.i("musicDetail------->", musicHash.get("title").toString());
-		Log.i("musicDetail------->", musicHash.get("duration").toString());
-		Log.i("musicDetail------->", musicHash.get("artist").toString());
-		Log.i("musicDetail------->", musicHash.get("album").toString());
-		Log.i("musicDetail------->", musicHash.get("displayName").toString());
-		Log.i("musicDetail------->", musicHash.get("data").toString());
-		Log.i("musicDetail------->", musicHash.get("albumCover").toString());
+		// Log.i("musicDetail------->", musicHash.get("_id").toString());
+		// Log.i("musicDetail------->", musicHash.get("title").toString());
+		// Log.i("musicDetail------->", musicHash.get("duration").toString());
+		// Log.i("musicDetail------->", musicHash.get("artist").toString());
+		// Log.i("musicDetail------->", musicHash.get("album").toString());
+		// Log.i("musicDetail------->",
+		// musicHash.get("displayName").toString());
+		// Log.i("musicDetail------->", musicHash.get("data").toString());
+		// Log.i("musicDetail------->", musicHash.get("albumCover").toString());
 
+	}
+
+	/**
+	 * 显示专辑信息
+	 */
+	void showAlbum() {
+		HashMap<String, Object> musicHash = MainActivity.hashMusicList.get(MainActivity.currentMusicListIndex);
+		imageViewAlbumCover.setImageDrawable((Drawable) musicHash.get("albumCover"));
+		textViewTitle.setText(musicHash.get("title").toString());
+		textViewAlbum.setText(musicHash.get("album").toString());
+		textViewArtist.setText(musicHash.get("artist").toString());
+		textViewDuration.setText(musicHash.get("duration").toString());
+
+		// 爲seekBar設置最大長度
+		seekBarProcess.setMax((Integer) musicHash.get("durationMillionSecond"));
 	}
 
 	/**
@@ -175,92 +174,15 @@ public class PlayActivity extends ActionBarActivity {
 		@Override
 		public void onStopTrackingTouch(SeekBar seekBar) {
 
-			if (MainActivity.mediaPlayer != null) {
+			if (PlayerService.mediaPlayer != null) {
 
 				int progress = seekBar.getProgress();
-				MainActivity.mediaPlayer.seekTo(progress);
+				PlayerService.mediaPlayer.seekTo(progress);
 
 				currentDuration = progress;
 				textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
 			}
 		}
-	}
-
-	/**
-	 * 播放出错
-	 * 
-	 * @author Administrator
-	 * 
-	 */
-	private class MediaErrorListener implements OnErrorListener {
-		@Override
-		public boolean onError(MediaPlayer arg0, int arg1, int arg2) {
-			MainActivity.mediaPlayer.stop();
-			MainActivity.mediaPlayer.release();
-			MainActivity.mediaPlayer = null;
-			Toast.makeText(PlayActivity.this, R.string.music_play_not_music_found, Toast.LENGTH_SHORT).show();
-			return false;
-		}
-	}
-
-	/**
-	 * 播放完成
-	 * 
-	 * @author Administrator
-	 * 
-	 */
-	private class MediaCompletionListener implements OnCompletionListener {
-		@Override
-		public void onCompletion(MediaPlayer arg0) {
-			Message m = handlerProcess.obtainMessage();
-			m.what = PLAYER_STATUS.STOPPED.getValue();
-			handlerProcess.sendMessage(m);
-		}
-	}
-
-	/**
-	 * 播放音乐
-	 * 
-	 * @param hash
-	 */
-	private void play(HashMap<String, Object> hash) {
-
-		String path = hash.get("data").toString();
-
-		if (path == null || "".equals(path)) {
-			Toast.makeText(this, R.string.music_play_not_music_found, Toast.LENGTH_SHORT).show();
-			return;
-		}
-
-		MainActivity.mediaPlayer.reset();
-		MainActivity.mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-		try {
-			MainActivity.mediaPlayer.setDataSource(path);
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		MainActivity.mediaPlayer.setOnCompletionListener(new MediaCompletionListener());
-		MainActivity.mediaPlayer.setOnErrorListener(new MediaErrorListener());
-		try {
-			MainActivity.mediaPlayer.prepare();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		MainActivity.mediaPlayer.start();
-
-		imageViewAlbumCover.setImageDrawable((Drawable) hash.get("albumCover"));
-		textViewTitle.setText(hash.get("title").toString());
-		textViewAlbum.setText(hash.get("album").toString());
-		textViewArtist.setText(hash.get("artist").toString());
-		textViewDuration.setText(hash.get("duration").toString());
 	}
 
 	/**
@@ -274,15 +196,15 @@ public class PlayActivity extends ActionBarActivity {
 			int controlDrawableId = 0;
 			if (msg.what == PLAYER_STATUS.STOPPED.getValue()) {
 				controlDrawableId = R.drawable.music_player_control_play;
-				MainActivity.mediaPlayer.stop();
+				PlayerService.mediaPlayer.stop();
 				handlerProcess.removeCallbacks(updateThreadPlaying);
 				textViewCurrentDuration.setText("00:00");
 			} else if (msg.what == PLAYER_STATUS.PAUSED.getValue()) {
 				controlDrawableId = R.drawable.music_player_control_play;
-				MainActivity.mediaPlayer.pause();
+				PlayerService.mediaPlayer.pause();
 			} else {
 				controlDrawableId = R.drawable.music_player_control_pause;
-				MainActivity.mediaPlayer.start();
+				PlayerService.mediaPlayer.start();
 			}
 
 			imageButtonControl.setImageResource(controlDrawableId);

@@ -29,6 +29,11 @@
             android:name="com.lison.musicplayer.PlayActivity"
             android:label="@string/play_activity_title" >
         </activity>
+
+        <service
+            android:name="com.service.audio.PlayerService"
+            android:enabled="true" >
+        </service>
     </application>
 
 </manifest>
