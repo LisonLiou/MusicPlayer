@@ -18,12 +18,20 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
+
 import com.content.provider.MusicProvider;
+import com.service.audio.PlayerService;
 
 public class MainActivity extends ActionBarActivity {
 
-	// ArrayList文件列表对象
-	private ArrayList<HashMap<String, Object>> hashMusicList = new ArrayList<HashMap<String, Object>>();
+	// doc ref
+	private final String doc_ref = "http://blog.csdn.net/zzy916853616/article/details/6450753";
+
+	// ArrayList文件列表对象（数据源：当前）
+	public static ArrayList<HashMap<String, Object>> hashMusicList = new ArrayList<HashMap<String, Object>>();
+
+	// 当前播放的音乐索引
+	public static int currentMusicListIndex = 0;
 
 	// ListView文件列表控件
 	private ListView listViewMusic;
@@ -31,21 +39,24 @@ public class MainActivity extends ActionBarActivity {
 	// Support ActionBar
 	private ActionBar actionBar;
 
-	/**
-	 * 媒体播放对象
-	 */
-	public static MediaPlayer mediaPlayer = null;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 
+		// 初始化控件
+		initView();
+
+		// 获取音乐文件列表
+		bindList();
+	}
+
+	/**
+	 * 初始化控件
+	 */
+	void initView() {
 		listViewMusic = (ListView) super.findViewById(R.id.listViewMusicList);
 		actionBar = super.getSupportActionBar();
-
-		// 绑定文件列表
-		bindList();
 
 		listViewMusic.setOnItemClickListener(new MyListViewOnItemClickListener());
 	}
@@ -59,15 +70,26 @@ public class MainActivity extends ActionBarActivity {
 	public class MyListViewOnItemClickListener implements OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-			// TODO Auto-generated method stub
 
-			HashMap<String, Object> selected = (HashMap<String, Object>) hashMusicList.get(position);
+			currentMusicListIndex = position;
+			play(PlayerConstant.PLAYER_STATUS.PLAYING.getValue());
 
 			Intent intentPlay = new Intent();
-			intentPlay.putExtra("musicId", selected.get("_id").toString());
 			intentPlay.setClass(MainActivity.this, PlayActivity.class);
 			startActivity(intentPlay);
 		}
+	}
+
+	/**
+	 * 开启service播放音乐
+	 * 
+	 * @param action
+	 */
+	public void play(int action) {
+		Intent intent = new Intent();
+		intent.putExtra("CURRENT_PLAYER_STATUS", action);
+		intent.setClass(MainActivity.this, PlayerService.class);
+		startService(intent);
 	}
 
 	@Override
@@ -109,7 +131,7 @@ public class MainActivity extends ActionBarActivity {
 
 			@Override
 			public boolean setViewValue(View view, Object data, String textRepresentation) {
-
+				
 				if (view instanceof ImageView && data instanceof Drawable) {
 					ImageView iv = (ImageView) view;
 					iv.setImageDrawable((Drawable) data);
