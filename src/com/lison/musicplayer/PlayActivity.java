@@ -5,12 +5,13 @@ import java.util.HashMap;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,6 +20,8 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+
+import com.content.provider.MusicProvider;
 import com.service.audio.PlayerService;
 import com.utils.common.MusicHelper;
 
@@ -68,6 +71,12 @@ public class PlayActivity extends ActionBarActivity {
 	 */
 	public static PLAYER_STATUS currentPlayerStatus = null;
 
+	// 處理播放進度與控制的新綫程
+	private Thread thread1;
+
+	// 当前播放的媒体id
+	private static int currentMediaId;
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -76,6 +85,9 @@ public class PlayActivity extends ActionBarActivity {
 		init();
 	}
 
+	/**
+	 * 菜单项单击处理
+	 */
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
@@ -117,14 +129,39 @@ public class PlayActivity extends ActionBarActivity {
 		textViewDuration = (TextView) super.findViewById(R.id.textViewDuration);
 		textViewCurrentDuration = (TextView) super.findViewById(R.id.textViewCurrentDuration);
 		musicHelper = new MusicHelper(this);
+
+
+		// 獲取傳遞來的數據musicId ： _id
+		Intent intentPlay = super.getIntent();
+		int musicId = Integer.parseInt(intentPlay.getStringExtra("musicId"));
+
+		if (PlayerService.mediaPlayer == null)
+			PlayerService.mediaPlayer = new MediaPlayer();
+
+		if (PlayerService.mediaPlayer.isPlaying())
+			if (currentMediaId != musicId) {
+				PlayerService.mediaPlayer.stop();
+				PlayerService.mediaPlayer.reset();
+			}
+
+		currentMediaId = musicId;
+
+		MusicProvider musicProvider = new MusicProvider(this);
+		HashMap<String, Object> musicHash = musicProvider.getMusicDetail(currentMediaId);
+		play(musicHash);
+
+
 		seekBarProcess = (SeekBar) super.findViewById(R.id.seekBarProcess);
 		// 綁定SeekBar事件
 		seekBarProcess.setOnSeekBarChangeListener(new MyOnSeekBarChangeListener());
 
 		showAlbum();
 
-		// 线程类压入looper
-		handlerProcess.post(updateThreadPlaying);
+		// 启动新线程
+		if (thread1 == null) {
+			thread1 = new Thread(updateThreadPlaying);
+			thread1.start();
+		}
 
 		// Log.i("musicDetail------->", musicHash.get("_id").toString());
 		// Log.i("musicDetail------->", musicHash.get("title").toString());
@@ -151,6 +188,44 @@ public class PlayActivity extends ActionBarActivity {
 
 		// 爲seekBar設置最大長度
 		seekBarProcess.setMax((Integer) musicHash.get("durationMillionSecond"));
+	}
+
+	private static final String TAG = "ActivityLifeCircle";
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		Log.e(TAG, "start onStart~~~");
+	}
+
+	@Override
+	protected void onRestart() {
+		super.onRestart();
+		Log.e(TAG, "start onRestart~~~");
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		Log.e(TAG, "start onResume~~~");
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		Log.e(TAG, "start onPause~~~");
+	}
+
+	@Override
+	protected void onStop() {
+		super.onStop();
+		Log.e(TAG, "start onStop~~~");
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+		Log.e(TAG, "start onDestroy~~~");
 	}
 
 	/**

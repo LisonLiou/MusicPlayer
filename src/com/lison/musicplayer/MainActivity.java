@@ -117,8 +117,6 @@ public class MainActivity extends ActionBarActivity {
 	 */
 	void bindList() {
 
-		// http://blog.csdn.net/zhang31jian/article/details/21231467
-
 		MusicProvider musicProvider = new MusicProvider(this);
 		hashMusicList = musicProvider.getAllMusic();
 
@@ -133,6 +131,7 @@ public class MainActivity extends ActionBarActivity {
 
 			@Override
 			public boolean setViewValue(View view, Object data, String textRepresentation) {
+				
 				if (view instanceof ImageView && data instanceof Drawable) {
 					ImageView iv = (ImageView) view;
 					iv.setImageDrawable((Drawable) data);
