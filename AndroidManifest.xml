@@ -32,7 +32,10 @@
 
         <service
             android:name="com.service.audio.PlayerService"
-            android:enabled="true" >
+            android:enabled="true"
+            android:exported="false" >
+            <intent-filter android:priority="1000" >
+            </intent-filter>
         </service>
     </application>
 

@@ -3,9 +3,10 @@ package com.lison.musicplayer;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
@@ -67,12 +68,12 @@ public class MainActivity extends ActionBarActivity {
 	 * @author Lison-Liou
 	 * 
 	 */
-	public class MyListViewOnItemClickListener implements OnItemClickListener {
+	private class MyListViewOnItemClickListener implements OnItemClickListener {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
 			currentMusicListIndex = position;
-			play(PlayerConstant.PLAYER_STATUS.PLAYING.getValue());
+			play(MainActivity.this, MainActivity.this, PlayerConstant.PLAYER_STATUS.PLAYING.getValue());
 
 			Intent intentPlay = new Intent();
 			intentPlay.setClass(MainActivity.this, PlayActivity.class);
@@ -85,11 +86,11 @@ public class MainActivity extends ActionBarActivity {
 	 * 
 	 * @param action
 	 */
-	public void play(int action) {
+	public static void play(Context context, Activity activityFrom, int action) {
 		Intent intent = new Intent();
 		intent.putExtra("CURRENT_PLAYER_STATUS", action);
-		intent.setClass(MainActivity.this, PlayerService.class);
-		startService(intent);
+		intent.setClass(activityFrom, PlayerService.class);
+		context.startService(intent);
 	}
 
 	@Override
@@ -131,7 +132,7 @@ public class MainActivity extends ActionBarActivity {
 
 			@Override
 			public boolean setViewValue(View view, Object data, String textRepresentation) {
-				
+
 				if (view instanceof ImageView && data instanceof Drawable) {
 					ImageView iv = (ImageView) view;
 					iv.setImageDrawable((Drawable) data);
