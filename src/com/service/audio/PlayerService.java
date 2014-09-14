@@ -2,14 +2,11 @@ package com.service.audio;
 
 import java.io.IOException;
 import java.util.HashMap;
-
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.IBinder;
 import android.util.Log;
-
-import com.content.provider.MusicProvider;
 import com.lison.musicplayer.MainActivity;
 import com.lison.musicplayer.PlayerConstant;
 
@@ -20,6 +17,9 @@ public class PlayerService extends Service implements Runnable, MediaPlayer.OnCo
 
 	// 播放器当前状态 ( 参照枚举：Player_Status )
 	private int currentPlayerStatus;
+
+	// 当前正在播放的音乐索引，用于重新请求对比
+	public static int currentPlayingMusicIndex = -1;
 
 	@Override
 	public IBinder onBind(Intent intent) {
@@ -85,11 +85,18 @@ public class PlayerService extends Service implements Runnable, MediaPlayer.OnCo
 	private void playMusic() {
 
 		try {
+
+			// 重新请求的音乐索引与当前播放的是一样的
+			if (currentPlayingMusicIndex == MainActivity.currentMusicListIndex)
+				return;
+
 			// 重置多媒体
 			mediaPlayer.reset();
 
 			// 读取mp3文件
 			HashMap<String, Object> media = MainActivity.hashMusicList.get(MainActivity.currentMusicListIndex);
+
+			currentPlayingMusicIndex = MainActivity.currentMusicListIndex;
 			mediaPlayer.setDataSource(media.get("data").toString());
 
 			// 准备播放
