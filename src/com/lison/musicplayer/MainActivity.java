@@ -25,9 +25,6 @@ import com.service.audio.PlayerService;
 
 public class MainActivity extends ActionBarActivity {
 
-	// doc ref
-	private final String doc_ref = "http://blog.csdn.net/zzy916853616/article/details/6450753";
-
 	// ArrayList文件列表对象（数据源：当前）
 	public static ArrayList<HashMap<String, Object>> hashMusicList = new ArrayList<HashMap<String, Object>>();
 
@@ -90,7 +87,7 @@ public class MainActivity extends ActionBarActivity {
 		Intent intent = new Intent();
 		intent.putExtra("CURRENT_PLAYER_STATUS", action);
 		intent.setClass(activityFrom, PlayerService.class);
-		context.startService(intent);		
+		context.startService(intent);
 	}
 
 	@Override
@@ -122,7 +119,7 @@ public class MainActivity extends ActionBarActivity {
 		hashMusicList = musicProvider.getAllMusic();
 
 		int[] displayControls = { 0, R.id.textViewMusicTitle, R.id.textViewMusicDuration, 0, R.id.textViewMusicAuthor, R.id.textViewAlbumName,
-				R.id.textViewFileDisplayName, R.id.textViewFileAbsolutePath, R.id.imageViewAlbumCover };
+				R.id.textViewFileDisplayName, R.id.textViewFileAbsolutePath, R.id.imageViewAlbumCover, 0 };
 
 		SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, hashMusicList, R.layout.music_list, MusicProvider.getMusicListDisplayColumnDefault(),
 				displayControls);

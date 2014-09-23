@@ -12,7 +12,6 @@ import android.util.Log;
 
 import com.lison.musicplayer.MainActivity;
 import com.lison.musicplayer.PlayActivity;
-import com.lison.musicplayer.PlayActivity.PLAYER_STATUS;
 import com.lison.musicplayer.PlayerConstant;
 
 public class PlayerService extends Service implements Runnable {
@@ -52,7 +51,7 @@ public class PlayerService extends Service implements Runnable {
 			@Override
 			public void onCompletion(MediaPlayer mp) {
 
-				PlayActivity.currentPlayerStatus = PLAYER_STATUS.STOPPED;
+				PlayActivity.currentPlayerStatus = PlayerConstant.PLAYER_STATUS.STOPPED;
 				playActivity.playNext();
 			}
 		});

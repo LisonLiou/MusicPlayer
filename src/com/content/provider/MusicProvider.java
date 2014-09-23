@@ -23,11 +23,11 @@ public class MusicProvider {
 	// 音乐列表默认数据源列
 	public static final String[] MUSIC_LIST_SOURCE_COLUMN_DEFAULT = { MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DURATION,
 			MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media._ID, MediaStore.Audio.Media.ALBUM, MediaStore.Audio.Media.DISPLAY_NAME,
-			MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID, };
+			MediaStore.Audio.Media.DATA, MediaStore.Audio.Media.ALBUM_ID, null };
 
 	// 音乐列表默认显示列
 	public static final String[] MUSIC_LIST_DISPLAY_COLUMN_DEFAULT = { "_id", "title", "duration", "durationMillionSecond", "artist", "album", "displayName",
-			"data", "albumCover" };
+			"data", "albumCover", "albumCoverExist" };
 
 	// 音乐列表默认排序规则
 	public static final String MUSIC_LIST_SORT_ORDER_DEFAULT = "_id desc";
@@ -72,11 +72,6 @@ public class MusicProvider {
 		ArrayList<HashMap<String, Object>> hashMusicList = new ArrayList<HashMap<String, Object>>();
 		while (cursor.moveToNext()) {
 
-			Drawable albumCover = Drawable
-					.createFromPath(musicHelper.getAlbumArt(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))));
-			if (albumCover == null)
-				albumCover = _context.getResources().getDrawable(R.drawable.album_default_cover);
-
 			HashMap<String, Object> hash1 = new HashMap<String, Object>();
 			hash1.put("_id", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
 			hash1.put("title", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
@@ -89,6 +84,15 @@ public class MusicProvider {
 			hash1.put("album", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM)));
 			hash1.put("displayName", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DISPLAY_NAME)));
 			hash1.put("data", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA)));
+
+			Drawable albumCover = Drawable
+					.createFromPath(musicHelper.getAlbumArt(cursor.getInt(cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID))));
+			if (albumCover == null) {
+				albumCover = _context.getResources().getDrawable(R.drawable.album_default_cover);
+				hash1.put("albumCoverExist", 0);
+			} else {
+				hash1.put("albumCoverExist", 1);
+			}
 			hash1.put("albumCover", albumCover);
 
 			hashMusicList.add(hash1);

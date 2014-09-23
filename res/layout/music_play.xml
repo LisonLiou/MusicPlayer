@@ -10,7 +10,8 @@
         android:layout_width="match_parent"
         android:layout_height="260dip"
         android:layout_gravity="top"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:soundEffectsEnabled="true" />
 
     <TextView
         android:id="@+id/textViewTitle"

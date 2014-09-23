@@ -6,6 +6,8 @@ import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -18,10 +20,12 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ImageView.ScaleType;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
+import com.lison.musicplayer.PlayerConstant.PLAYER_STATUS;
 import com.service.audio.PlayerService;
 import com.utils.common.MusicHelper;
 
@@ -49,24 +53,6 @@ public class PlayActivity extends ActionBarActivity {
 	private int currentDuration = 0x00;
 
 	/**
-	 * 播放器状态枚舉（可獲得枚舉對應數字）
-	 */
-	public static enum PLAYER_STATUS {
-
-		PLAYING(1), STOPPED(-1), PAUSED(0);
-
-		private int value = -1;
-
-		PLAYER_STATUS(int value) {
-			this.value = value;
-		}
-
-		public int getValue() {
-			return this.value;
-		}
-	}
-
-	/**
 	 * 当前播放器状态
 	 */
 	public static PLAYER_STATUS currentPlayerStatus = null;
@@ -79,6 +65,11 @@ public class PlayActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.music_play);
 		initView();
+
+		handlerProcess.removeCallbacks(updateThreadPlaying);
+		handlerProcess.post(updateThreadPlaying);
+
+		PlayerService.playActivity = this;
 	}
 
 	/**
@@ -136,7 +127,7 @@ public class PlayActivity extends ActionBarActivity {
 
 		showAlbum();
 
-		if (PlayerService.mediaPlayer.isPlaying()) {
+		if (PlayerService.currentPlayingMusicIndex == MainActivity.currentMusicListIndex) {
 			currentDuration = PlayerService.mediaPlayer.getCurrentPosition();
 			seekBarProcess.setProgress(currentDuration);
 		} else {
@@ -151,19 +142,23 @@ public class PlayActivity extends ActionBarActivity {
 		// thread1 = new Thread(updateThreadPlaying);
 		// thread1.start();
 		// }
-
-		handlerProcess.removeCallbacks(updateThreadPlaying);
-		handlerProcess.post(updateThreadPlaying);
-
-		PlayerService.playActivity = this;
 	}
 
 	/**
 	 * 显示专辑信息
 	 */
 	void showAlbum() {
+
 		HashMap<String, Object> musicHash = MainActivity.hashMusicList.get(MainActivity.currentMusicListIndex);
-		imageViewAlbumCover.setImageDrawable((Drawable) musicHash.get("albumCover"));
+
+		if (Integer.parseInt(musicHash.get("albumCoverExist").toString()) == 1) {
+			Drawable d = (Drawable) musicHash.get("albumCover");
+			imageViewAlbumCover.setImageDrawable(d);
+		} else {
+			imageViewAlbumCover.setImageResource(R.drawable.album_default_cover_normal);
+			imageViewAlbumCover.setScaleType(ScaleType.CENTER_INSIDE);
+		}
+
 		textViewTitle.setText(musicHash.get("title").toString());
 		textViewAlbum.setText(musicHash.get("album").toString());
 		textViewArtist.setText(musicHash.get("artist").toString());
@@ -250,6 +245,7 @@ public class PlayActivity extends ActionBarActivity {
 			} else {
 				m.what = PLAYER_STATUS.STOPPED.getValue();
 				textViewCurrentDuration.setText("00:00");
+				seekBarProcess.setProgress(0);
 			}
 
 			handlerProcess.handleMessage(m);
@@ -265,7 +261,6 @@ public class PlayActivity extends ActionBarActivity {
 			MainActivity.currentMusicListIndex = 0;
 		}
 		currentPlayerStatus = PLAYER_STATUS.STOPPED;
-		//PlayerService.mediaPlayer.stop();
 		initView();
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}
@@ -278,7 +273,6 @@ public class PlayActivity extends ActionBarActivity {
 			MainActivity.currentMusicListIndex = MainActivity.hashMusicList.size() - 1;
 		}
 		currentPlayerStatus = PLAYER_STATUS.STOPPED;
-		//PlayerService.mediaPlayer.stop();
 		initView();
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}
