@@ -2,15 +2,20 @@ package com.service.audio;
 
 import java.io.IOException;
 import java.util.HashMap;
+
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.media.MediaPlayer.OnCompletionListener;
 import android.os.IBinder;
 import android.util.Log;
+
 import com.lison.musicplayer.MainActivity;
+import com.lison.musicplayer.PlayActivity;
+import com.lison.musicplayer.PlayActivity.PLAYER_STATUS;
 import com.lison.musicplayer.PlayerConstant;
 
-public class PlayerService extends Service implements Runnable, MediaPlayer.OnCompletionListener {
+public class PlayerService extends Service implements Runnable {
 
 	// 定义一个多媒体对象
 	public static MediaPlayer mediaPlayer = null;
@@ -21,11 +26,16 @@ public class PlayerService extends Service implements Runnable, MediaPlayer.OnCo
 	// 当前正在播放的音乐索引，用于重新请求对比
 	public static int currentPlayingMusicIndex = -1;
 
+	// 自定義BroadcastReceiver的action
+	private final String MYBROADCASTRECEIVER_ACTION_PLAY_COMPLETE = "com.lison.musicplayer.playcomplete";
+
 	@Override
 	public IBinder onBind(Intent intent) {
 		Log.i("Service ------------->", "onBind");
 		return null;
 	}
+
+	public static PlayActivity playActivity = null;
 
 	@Override
 	public void onCreate() {
@@ -40,7 +50,15 @@ public class PlayerService extends Service implements Runnable, MediaPlayer.OnCo
 		mediaPlayer = new MediaPlayer();
 
 		// 监听播放是否完成
-		mediaPlayer.setOnCompletionListener(this);
+		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
+
+			@Override
+			public void onCompletion(MediaPlayer mp) {
+
+				PlayActivity.currentPlayerStatus = PLAYER_STATUS.STOPPED;
+				playActivity.playNext();
+			}
+		});
 	}
 
 	@Override
@@ -83,12 +101,13 @@ public class PlayerService extends Service implements Runnable, MediaPlayer.OnCo
 	 * 播放音乐
 	 */
 	private void playMusic() {
-
 		try {
 
 			// 重新请求的音乐索引与当前播放的是一样的
 			if (currentPlayingMusicIndex == MainActivity.currentMusicListIndex)
 				return;
+
+			mediaPlayer.stop();
 
 			// 重置多媒体
 			mediaPlayer.reset();
@@ -118,14 +137,7 @@ public class PlayerService extends Service implements Runnable, MediaPlayer.OnCo
 	}
 
 	@Override
-	public void onCompletion(MediaPlayer arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-
 	}
 }

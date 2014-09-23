@@ -90,7 +90,7 @@ public class MainActivity extends ActionBarActivity {
 		Intent intent = new Intent();
 		intent.putExtra("CURRENT_PLAYER_STATUS", action);
 		intent.setClass(activityFrom, PlayerService.class);
-		context.startService(intent);
+		context.startService(intent);		
 	}
 
 	@Override

@@ -3,6 +3,8 @@ package com.lison.musicplayer;
 import java.util.HashMap;
 
 import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -10,6 +12,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -136,6 +139,11 @@ public class PlayActivity extends ActionBarActivity {
 		if (PlayerService.mediaPlayer.isPlaying()) {
 			currentDuration = PlayerService.mediaPlayer.getCurrentPosition();
 			seekBarProcess.setProgress(currentDuration);
+		} else {
+			// 重置当前播放进度
+			textViewCurrentDuration.setText("00:00");
+			currentDuration = 0;
+			seekBarProcess.setProgress(currentDuration);
 		}
 
 		// // 启动新线程
@@ -146,6 +154,8 @@ public class PlayActivity extends ActionBarActivity {
 
 		handlerProcess.removeCallbacks(updateThreadPlaying);
 		handlerProcess.post(updateThreadPlaying);
+
+		PlayerService.playActivity = this;
 	}
 
 	/**
@@ -248,6 +258,32 @@ public class PlayActivity extends ActionBarActivity {
 	};
 
 	/**
+	 * 播放下一首
+	 */
+	public void playNext() {
+		if (++MainActivity.currentMusicListIndex > MainActivity.hashMusicList.size() - 1) {
+			MainActivity.currentMusicListIndex = 0;
+		}
+		currentPlayerStatus = PLAYER_STATUS.STOPPED;
+		PlayerService.mediaPlayer.stop();
+		initView();
+		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
+	}
+
+	/**
+	 * 播放上一首
+	 */
+	public void playPrevious() {
+		if (--MainActivity.currentMusicListIndex < 0) {
+			MainActivity.currentMusicListIndex = MainActivity.hashMusicList.size() - 1;
+		}
+		currentPlayerStatus = PLAYER_STATUS.STOPPED;
+		PlayerService.mediaPlayer.stop();
+		initView();
+		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
+	}
+
+	/**
 	 * 自定义onclick事件
 	 * 
 	 * @author Lison-Liou
@@ -281,35 +317,11 @@ public class PlayActivity extends ActionBarActivity {
 			}
 				break;
 			case R.id.imageButtonPrevious: {
-				if (--MainActivity.currentMusicListIndex < 0) {
-					MainActivity.currentMusicListIndex = MainActivity.hashMusicList.size() - 1;
-				}
-
-				PlayerService.mediaPlayer.stop();
-
-				// 重置当前播放进度
-				textViewCurrentDuration.setText("00:00");
-				currentDuration = 0;
-				seekBarProcess.setProgress(currentDuration);
-
-				MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
-				initView();
+				playPrevious();
 				break;
 			}
 			case R.id.imageButtonNext: {
-				if (++MainActivity.currentMusicListIndex > MainActivity.hashMusicList.size()-1) {
-					MainActivity.currentMusicListIndex = 0;
-				}
-
-				PlayerService.mediaPlayer.stop();
-
-				// 重置当前播放进度
-				textViewCurrentDuration.setText("00:00");
-				currentDuration = 0;
-				seekBarProcess.setProgress(currentDuration);
-
-				MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
-				initView();
+				playNext();
 				break;
 			}
 			}

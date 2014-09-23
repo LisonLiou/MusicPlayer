@@ -37,6 +37,16 @@
             <intent-filter android:priority="1000" >
             </intent-filter>
         </service>
+
+        <receiver
+            android:name="com.lison.musicplayer.PlayActivity$myBroadcastReceiver"
+            android:enabled="true"
+            android:exported="false" >
+            <intent-filter>
+                <action android:name="com.lison.musicplayer.playcomplete" >
+                </action>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
