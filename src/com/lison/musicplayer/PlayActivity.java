@@ -136,12 +136,6 @@ public class PlayActivity extends ActionBarActivity {
 			currentDuration = 0;
 			seekBarProcess.setProgress(currentDuration);
 		}
-
-		// // 启动新线程
-		// if (thread1 == null) {
-		// thread1 = new Thread(updateThreadPlaying);
-		// thread1.start();
-		// }
 	}
 
 	/**
@@ -154,6 +148,7 @@ public class PlayActivity extends ActionBarActivity {
 		if (Integer.parseInt(musicHash.get("albumCoverExist").toString()) == 1) {
 			Drawable d = (Drawable) musicHash.get("albumCover");
 			imageViewAlbumCover.setImageDrawable(d);
+			imageViewAlbumCover.setScaleType(ScaleType.CENTER_CROP);
 		} else {
 			imageViewAlbumCover.setImageResource(R.drawable.album_default_cover_normal);
 			imageViewAlbumCover.setScaleType(ScaleType.CENTER_INSIDE);
@@ -243,6 +238,7 @@ public class PlayActivity extends ActionBarActivity {
 					textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
 				}
 			} else {
+				currentDuration=0;
 				m.what = PLAYER_STATUS.STOPPED.getValue();
 				textViewCurrentDuration.setText("00:00");
 				seekBarProcess.setProgress(0);
@@ -260,7 +256,6 @@ public class PlayActivity extends ActionBarActivity {
 		if (++MainActivity.currentMusicListIndex > MainActivity.hashMusicList.size() - 1) {
 			MainActivity.currentMusicListIndex = 0;
 		}
-		currentPlayerStatus = PLAYER_STATUS.STOPPED;
 		initView();
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}
@@ -272,7 +267,6 @@ public class PlayActivity extends ActionBarActivity {
 		if (--MainActivity.currentMusicListIndex < 0) {
 			MainActivity.currentMusicListIndex = MainActivity.hashMusicList.size() - 1;
 		}
-		currentPlayerStatus = PLAYER_STATUS.STOPPED;
 		initView();
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}
