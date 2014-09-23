@@ -265,7 +265,7 @@ public class PlayActivity extends ActionBarActivity {
 			MainActivity.currentMusicListIndex = 0;
 		}
 		currentPlayerStatus = PLAYER_STATUS.STOPPED;
-		PlayerService.mediaPlayer.stop();
+		//PlayerService.mediaPlayer.stop();
 		initView();
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}
@@ -278,7 +278,7 @@ public class PlayActivity extends ActionBarActivity {
 			MainActivity.currentMusicListIndex = MainActivity.hashMusicList.size() - 1;
 		}
 		currentPlayerStatus = PLAYER_STATUS.STOPPED;
-		PlayerService.mediaPlayer.stop();
+		//PlayerService.mediaPlayer.stop();
 		initView();
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}

@@ -26,9 +26,6 @@ public class PlayerService extends Service implements Runnable {
 	// 当前正在播放的音乐索引，用于重新请求对比
 	public static int currentPlayingMusicIndex = -1;
 
-	// 自定義BroadcastReceiver的action
-	private final String MYBROADCASTRECEIVER_ACTION_PLAY_COMPLETE = "com.lison.musicplayer.playcomplete";
-
 	@Override
 	public IBinder onBind(Intent intent) {
 		Log.i("Service ------------->", "onBind");
