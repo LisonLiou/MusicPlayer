@@ -22,6 +22,7 @@ import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 
 import com.content.provider.MusicProvider;
+import com.lison.musicplayer.PlayerConstant.PLAYER_STATUS;
 import com.service.audio.PlayerService;
 
 public class MainActivity extends ActionBarActivity {
@@ -93,6 +94,8 @@ public class MainActivity extends ActionBarActivity {
 
 		Log.i(TAG, "开启Service播放音乐：MainActivity-->play()");
 		Log.i(TAG, "after play()-->CURRENT_PLAYER_STATUS" + action);
+
+		PlayActivity.currentPlayerStatus = PLAYER_STATUS.PLAYING;
 
 		Intent intent = new Intent();
 		intent.putExtra("CURRENT_PLAYER_STATUS", action);

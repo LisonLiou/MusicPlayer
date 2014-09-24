@@ -3,11 +3,7 @@ package com.lison.musicplayer;
 import java.util.HashMap;
 
 import android.annotation.SuppressLint;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -130,16 +126,6 @@ public class PlayActivity extends ActionBarActivity {
 
 		showAlbum();
 
-		if (PlayerService.currentPlayingMusicIndex == MainActivity.currentMusicListIndex) {
-			currentDuration = PlayerService.mediaPlayer.getCurrentPosition();
-			seekBarProcess.setProgress(currentDuration);
-		} else {
-			// 重置当前播放进度
-			textViewCurrentDuration.setText("00:00");
-			currentDuration = 0;
-			seekBarProcess.setProgress(currentDuration);
-		}
-
 		Log.i(MainActivity.TAG, "PlayActivity-->onCreate-->initView-->currentDuration=" + currentDuration);
 	}
 
@@ -166,6 +152,16 @@ public class PlayActivity extends ActionBarActivity {
 
 		// 爲seekBar設置最大長度
 		seekBarProcess.setMax((Integer) musicHash.get("durationMillionSecond"));
+
+		if (PlayerService.currentPlayingMusicIndex == MainActivity.currentMusicListIndex) {
+			currentDuration = PlayerService.mediaPlayer.getCurrentPosition();
+			seekBarProcess.setProgress(currentDuration);
+		} else {
+			// 重置当前播放进度
+			textViewCurrentDuration.setText("00:00");
+			currentDuration = 0;
+			seekBarProcess.setProgress(currentDuration);
+		}
 
 		Log.i(MainActivity.TAG, "PlayActivity-->showAlbum()-->duration=" + textViewDuration.getText());
 		Log.i(MainActivity.TAG, "PlayActivity-->showAlbum()-->seekBarProcess.Max=" + seekBarProcess.getMax());
@@ -227,7 +223,7 @@ public class PlayActivity extends ActionBarActivity {
 				controlDrawableId = R.drawable.music_player_control_pause;
 				PlayerService.mediaPlayer.start();
 			}
-
+			handlerProcess.postDelayed(updateThreadPlaying, 1000);
 			imageButtonControl.setImageResource(controlDrawableId);
 		}
 	};
@@ -254,7 +250,6 @@ public class PlayActivity extends ActionBarActivity {
 					textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
 
 					Log.i(MainActivity.TAG, "PlayActivity-->updateThreadPlaying-->handlerProcess.postDelayed(updateThreadPlaying, 1000)");
-					handlerProcess.postDelayed(updateThreadPlaying, 1000);
 				}
 			} else {
 				currentDuration = 0;
@@ -262,7 +257,6 @@ public class PlayActivity extends ActionBarActivity {
 				textViewCurrentDuration.setText("00:00");
 				seekBarProcess.setProgress(0);
 				Log.i(MainActivity.TAG, "PlayActivity-->updateThreadPlaying-->handlerProcess.postremoveCallBacks(updateThreadPlaying)");
-				handlerProcess.removeCallbacks(updateThreadPlaying);
 			}
 
 			handlerProcess.handleMessage(m);
@@ -276,7 +270,7 @@ public class PlayActivity extends ActionBarActivity {
 		if (++MainActivity.currentMusicListIndex > MainActivity.hashMusicList.size() - 1) {
 			MainActivity.currentMusicListIndex = 0;
 		}
-		initView();
+
 		currentPlayerStatus = PLAYER_STATUS.STOPPED;
 		showAlbum();
 
@@ -292,7 +286,6 @@ public class PlayActivity extends ActionBarActivity {
 			MainActivity.currentMusicListIndex = MainActivity.hashMusicList.size() - 1;
 		}
 
-		initView();
 		currentPlayerStatus = PLAYER_STATUS.STOPPED;
 		showAlbum();
 
