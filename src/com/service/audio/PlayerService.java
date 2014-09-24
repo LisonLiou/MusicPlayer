@@ -27,7 +27,7 @@ public class PlayerService extends Service implements Runnable {
 
 	@Override
 	public IBinder onBind(Intent intent) {
-		Log.i("Service ------------->", "onBind");
+		Log.i(MainActivity.TAG, "PlayerService-->onBind()");
 		return null;
 	}
 
@@ -44,12 +44,17 @@ public class PlayerService extends Service implements Runnable {
 		}
 
 		mediaPlayer = new MediaPlayer();
+		Log.i(MainActivity.TAG, "PlayerService-->onCreate()");
 
 		// 监听播放是否完成
 		mediaPlayer.setOnCompletionListener(new OnCompletionListener() {
 
 			@Override
 			public void onCompletion(MediaPlayer mp) {
+
+				PlayActivity.currentPlayerStatus = PlayerConstant.PLAYER_STATUS.STOPPED;
+				Log.i(MainActivity.TAG, "PlayerService-->onCompletion()");
+
 				playActivity.playNext();
 			}
 		});
@@ -65,7 +70,7 @@ public class PlayerService extends Service implements Runnable {
 			mediaPlayer = null;
 		}
 
-		System.out.println("service onDestroy");
+		Log.i(MainActivity.TAG, "PlayerService-->onDestroy()");
 	}
 
 	/**
@@ -74,10 +79,10 @@ public class PlayerService extends Service implements Runnable {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 
-		Log.i("Service ------------->", "onStartCommand");
-
 		// 得到从startService传来的动作
 		currentPlayerStatus = intent.getIntExtra("CURRENT_PLAYER_STATUS", PlayerConstant.PLAYER_STATUS.PAUSED.getValue());
+
+		Log.i(MainActivity.TAG, "PlayerService-->onStartCommand()-->currentPlayerStatus=" + currentPlayerStatus);
 
 		if (currentPlayerStatus == PlayerConstant.PLAYER_STATUS.PLAYING.getValue() || currentPlayerStatus == PlayerConstant.PLAYER_STATUS.STOPPED.getValue()) {
 			playMusic();
@@ -96,6 +101,9 @@ public class PlayerService extends Service implements Runnable {
 	 */
 	private void playMusic() {
 		try {
+
+			Log.i(MainActivity.TAG, "PlayerService-->playMusic()-->currentPlayingMusicIndex==MainActivity.currentMusicListIndex:"
+					+ (currentPlayingMusicIndex == MainActivity.currentMusicListIndex));
 
 			// 重新请求的音乐索引与当前播放的是一样的
 			if (currentPlayingMusicIndex == MainActivity.currentMusicListIndex)

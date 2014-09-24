@@ -8,7 +8,9 @@ import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
+import com.lison.musicplayer.MainActivity;
 import com.lison.musicplayer.R;
 import com.utils.common.MusicHelper;
 
@@ -98,6 +100,7 @@ public class MusicProvider {
 			hashMusicList.add(hash1);
 		}
 
+		Log.i(MainActivity.TAG, "获取音乐列表：MusicPrivider-->getAllMusic()");
 		return hashMusicList;
 	}
 
@@ -136,6 +139,8 @@ public class MusicProvider {
 
 			return hash1;
 		}
+
+		Log.i(MainActivity.TAG, "获取音乐详细：MusicProvider-->getMusicDetail");
 
 		return null;
 	}
