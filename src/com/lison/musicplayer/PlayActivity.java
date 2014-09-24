@@ -10,7 +10,6 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -62,10 +61,7 @@ public class PlayActivity extends ActionBarActivity {
 		setContentView(R.layout.music_play);
 		initView();
 
-		Log.i(MainActivity.TAG, "PlayActivity-->onCreate-->initView()");
-
 		handlerProcess.post(updateThreadPlaying);
-		Log.i(MainActivity.TAG, "PlayActivity-->onCreate-->handlerProcess.post(updateThreadPlaying)");
 
 		PlayerService.playActivity = this;
 	}
@@ -109,7 +105,6 @@ public class PlayActivity extends ActionBarActivity {
 
 		// 设置播放器状态为正在播放（默认启动当前Activity就开始播放）
 		currentPlayerStatus = PLAYER_STATUS.PLAYING;
-		Log.i(MainActivity.TAG, "PlayActivity-->onCreate-->initView-->currentPlayerStatus=PLAYER_STATUS.PLAYING");
 
 		// 绑定音乐信息
 		imageViewAlbumCover = (ImageView) super.findViewById(R.id.imageViewAlbumCover);
@@ -125,8 +120,6 @@ public class PlayActivity extends ActionBarActivity {
 		seekBarProcess.setOnSeekBarChangeListener(new MyOnSeekBarChangeListener());
 
 		showAlbum();
-
-		Log.i(MainActivity.TAG, "PlayActivity-->onCreate-->initView-->currentDuration=" + currentDuration);
 	}
 
 	/**
@@ -162,9 +155,6 @@ public class PlayActivity extends ActionBarActivity {
 			currentDuration = 0;
 			seekBarProcess.setProgress(currentDuration);
 		}
-
-		Log.i(MainActivity.TAG, "PlayActivity-->showAlbum()-->duration=" + textViewDuration.getText());
-		Log.i(MainActivity.TAG, "PlayActivity-->showAlbum()-->seekBarProcess.Max=" + seekBarProcess.getMax());
 	}
 
 	/**
@@ -196,7 +186,9 @@ public class PlayActivity extends ActionBarActivity {
 				currentDuration = progress;
 				textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
 
-				Log.i(MainActivity.TAG, "PlayActivity-->SeekBarProcess.onStopTrackingTouch-->currentDuration=" + progress);
+				handlerProcess.removeCallbacks(updateThreadPlaying);
+				handlerProcess.post(updateThreadPlaying);
+				currentPlayerStatus = PLAYER_STATUS.PLAYING;
 			}
 		}
 	}
@@ -210,12 +202,11 @@ public class PlayActivity extends ActionBarActivity {
 		@Override
 		public void handleMessage(Message msg) {
 
-			Log.i(MainActivity.TAG, "PlayActivity-->handlerProcess-->msg.what=" + msg.what);
-
 			int controlDrawableId = 0;
 			if (msg.what == PLAYER_STATUS.STOPPED.getValue()) {
 				controlDrawableId = R.drawable.music_player_control_play;
 				PlayerService.mediaPlayer.stop();
+				handlerProcess.removeCallbacks(updateThreadPlaying);
 			} else if (msg.what == PLAYER_STATUS.PAUSED.getValue()) {
 				controlDrawableId = R.drawable.music_player_control_play;
 				PlayerService.mediaPlayer.pause();
@@ -239,25 +230,20 @@ public class PlayActivity extends ActionBarActivity {
 
 			Message m = handlerProcess.obtainMessage();
 
-			Log.i(MainActivity.TAG, "PlayActivity-->updateThreadPlaying-->currentDuration=" + currentDuration);
-			Log.i(MainActivity.TAG, "PlayActivity-->updateThreadPlaying-->seekBarProcess.Max=" + seekBarProcess.getMax());
-
 			if (currentDuration <= seekBarProcess.getMax()) {
 				if (currentPlayerStatus == PLAYER_STATUS.PLAYING) {
 					currentDuration += 1000;
 					m.what = PLAYER_STATUS.PLAYING.getValue();
+
 					seekBarProcess.incrementProgressBy(1000);
-
 					textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
-
-					Log.i(MainActivity.TAG, "PlayActivity-->updateThreadPlaying-->handlerProcess.postDelayed(updateThreadPlaying, 1000)");
 				}
 			} else {
 				currentDuration = 0;
 				m.what = PLAYER_STATUS.STOPPED.getValue();
+
 				textViewCurrentDuration.setText("00:00");
 				seekBarProcess.setProgress(0);
-				Log.i(MainActivity.TAG, "PlayActivity-->updateThreadPlaying-->handlerProcess.postremoveCallBacks(updateThreadPlaying)");
 			}
 
 			handlerProcess.handleMessage(m);
@@ -268,14 +254,17 @@ public class PlayActivity extends ActionBarActivity {
 	 * 播放下一首
 	 */
 	public void playNext() {
+
 		if (++MainActivity.currentMusicListIndex > MainActivity.hashMusicList.size() - 1) {
 			MainActivity.currentMusicListIndex = 0;
 		}
 
-		currentPlayerStatus = PLAYER_STATUS.STOPPED;
+		currentPlayerStatus = PLAYER_STATUS.PLAYING;
 		showAlbum();
 
-		Log.i(MainActivity.TAG, "PlayActivity-->playNext()-->currentPlayerStatus=" + currentPlayerStatus);
+		handlerProcess.removeCallbacks(updateThreadPlaying);
+		handlerProcess.post(updateThreadPlaying);
+
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}
 
@@ -283,14 +272,17 @@ public class PlayActivity extends ActionBarActivity {
 	 * 播放上一首
 	 */
 	public void playPrevious() {
+
 		if (--MainActivity.currentMusicListIndex < 0) {
 			MainActivity.currentMusicListIndex = MainActivity.hashMusicList.size() - 1;
 		}
 
-		currentPlayerStatus = PLAYER_STATUS.STOPPED;
+		currentPlayerStatus = PLAYER_STATUS.PLAYING;
 		showAlbum();
 
-		Log.i(MainActivity.TAG, "PlayActivity-->playPrevious()-->currentPlayerStatus=" + currentPlayerStatus);
+		handlerProcess.removeCallbacks(updateThreadPlaying);
+		handlerProcess.post(updateThreadPlaying);
+
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}
 
@@ -324,7 +316,7 @@ public class PlayActivity extends ActionBarActivity {
 					break;
 				}
 
-				handlerProcess.sendMessage(m);
+				handlerProcess.handleMessage(m);
 			}
 				break;
 			case R.id.imageButtonPrevious: {

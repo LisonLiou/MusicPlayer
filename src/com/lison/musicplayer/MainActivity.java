@@ -39,9 +39,6 @@ public class MainActivity extends ActionBarActivity {
 	// Support ActionBar
 	private ActionBar actionBar;
 
-	// Log Tag
-	public static final String TAG = "DEBUGGGGGGG--------->";
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -74,8 +71,6 @@ public class MainActivity extends ActionBarActivity {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-			Log.i(TAG, "音乐列表项单击事件：position=" + position);
-
 			currentMusicListIndex = position;
 			play(MainActivity.this, MainActivity.this, PlayerConstant.PLAYER_STATUS.PLAYING.getValue());
 
@@ -91,12 +86,6 @@ public class MainActivity extends ActionBarActivity {
 	 * @param action
 	 */
 	public static void play(Context context, Activity activityFrom, int action) {
-
-		Log.i(TAG, "开启Service播放音乐：MainActivity-->play()");
-		Log.i(TAG, "after play()-->CURRENT_PLAYER_STATUS" + action);
-
-		PlayActivity.currentPlayerStatus = PLAYER_STATUS.PLAYING;
-
 		Intent intent = new Intent();
 		intent.putExtra("CURRENT_PLAYER_STATUS", action);
 		intent.setClass(activityFrom, PlayerService.class);

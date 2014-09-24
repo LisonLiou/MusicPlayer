@@ -100,7 +100,6 @@ public class MusicProvider {
 			hashMusicList.add(hash1);
 		}
 
-		Log.i(MainActivity.TAG, "获取音乐列表：MusicPrivider-->getAllMusic()");
 		return hashMusicList;
 	}
 
@@ -139,8 +138,6 @@ public class MusicProvider {
 
 			return hash1;
 		}
-
-		Log.i(MainActivity.TAG, "获取音乐详细：MusicProvider-->getMusicDetail");
 
 		return null;
 	}
