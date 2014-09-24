@@ -222,8 +222,9 @@ public class PlayActivity extends ActionBarActivity {
 			} else {
 				controlDrawableId = R.drawable.music_player_control_pause;
 				PlayerService.mediaPlayer.start();
+				handlerProcess.postDelayed(updateThreadPlaying, 1000);
 			}
-			handlerProcess.postDelayed(updateThreadPlaying, 1000);
+
 			imageButtonControl.setImageResource(controlDrawableId);
 		}
 	};
