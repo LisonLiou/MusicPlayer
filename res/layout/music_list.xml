@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:imagecontrol="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="100dp"
     android:layout_margin="4dp"
@@ -10,14 +11,16 @@
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <ImageView
-            android:id="@+id/imageViewAlbumCover"
+        <com.widget.custom.RoundImageView
+            android:id="@+id/roundImageViewAlbumCover"
             android:layout_width="90dp"
             android:layout_height="90dp"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="4dp"
-            android:background="#00000000"
-            android:scaleType="centerCrop" />
+            android:scaleType="fitXY"
+            imagecontrol:border_inside_color="#cccccc"
+            imagecontrol:border_outside_color="#ecf0f1"
+            imagecontrol:border_thickness="1dp" />
     </LinearLayout>
 
     <LinearLayout

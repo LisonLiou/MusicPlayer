@@ -25,5 +25,4 @@ public class EntryApplication extends Application {
 		// TODO Auto-generated method stub
 		super.onTerminate();
 	}
-
 }

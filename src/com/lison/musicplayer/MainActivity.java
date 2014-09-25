@@ -1,11 +1,25 @@
 package com.lison.musicplayer;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.Path.Direction;
+import android.graphics.PixelFormat;
+import android.graphics.PorterDuff.Mode;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
@@ -22,7 +36,6 @@ import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
 
 import com.content.provider.MusicProvider;
-import com.lison.musicplayer.PlayerConstant.PLAYER_STATUS;
 import com.service.audio.PlayerService;
 
 public class MainActivity extends ActionBarActivity {
@@ -121,7 +134,7 @@ public class MainActivity extends ActionBarActivity {
 		hashMusicList = musicProvider.getAllMusic();
 
 		int[] displayControls = { 0, R.id.textViewMusicTitle, R.id.textViewMusicDuration, 0, R.id.textViewMusicAuthor, R.id.textViewAlbumName,
-				R.id.textViewFileDisplayName, R.id.textViewFileAbsolutePath, R.id.imageViewAlbumCover, 0 };
+				R.id.textViewFileDisplayName, R.id.textViewFileAbsolutePath, R.id.roundImageViewAlbumCover, 0 };
 
 		SimpleAdapter adapter = new SimpleAdapter(MainActivity.this, hashMusicList, R.layout.music_list, MusicProvider.getMusicListDisplayColumnDefault(),
 				displayControls);
@@ -134,6 +147,7 @@ public class MainActivity extends ActionBarActivity {
 
 				if (view instanceof ImageView && data instanceof Drawable) {
 					ImageView iv = (ImageView) view;
+
 					iv.setImageDrawable((Drawable) data);
 					return true;
 				} else
