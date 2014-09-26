@@ -1,6 +1,8 @@
 package com.lison.musicplayer;
 
 import java.util.HashMap;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -52,8 +54,8 @@ public class PlayActivity extends ActionBarActivity {
 	 */
 	public static PLAYER_STATUS currentPlayerStatus = null;
 
-	// 處理播放進度與控制的新綫程
-	private Thread thread1;
+	// 设置timer为守护进程（輪詢查看currentPlayerStatus并給Handler發送消息供其處理）
+	Timer timer = new Timer(true);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,8 +63,7 @@ public class PlayActivity extends ActionBarActivity {
 		setContentView(R.layout.music_play);
 		initView();
 
-		handlerProcess.post(updateThreadPlaying);
-
+		timer.schedule(taskTick, 0, 1000);
 		PlayerService.playActivity = this;
 	}
 
@@ -185,9 +186,6 @@ public class PlayActivity extends ActionBarActivity {
 
 				currentDuration = progress;
 				textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
-
-				handlerProcess.removeCallbacks(updateThreadPlaying);
-				handlerProcess.post(updateThreadPlaying);
 				currentPlayerStatus = PLAYER_STATUS.PLAYING;
 			}
 		}
@@ -206,14 +204,26 @@ public class PlayActivity extends ActionBarActivity {
 			if (msg.what == PLAYER_STATUS.STOPPED.getValue()) {
 				controlDrawableId = R.drawable.music_player_control_play;
 				PlayerService.mediaPlayer.stop();
-				handlerProcess.removeCallbacks(updateThreadPlaying);
 			} else if (msg.what == PLAYER_STATUS.PAUSED.getValue()) {
 				controlDrawableId = R.drawable.music_player_control_play;
 				PlayerService.mediaPlayer.pause();
 			} else {
 				controlDrawableId = R.drawable.music_player_control_pause;
 				PlayerService.mediaPlayer.start();
-				handlerProcess.postDelayed(updateThreadPlaying, 1000);
+
+				if (currentDuration <= seekBarProcess.getMax()) {
+					if (currentPlayerStatus == PLAYER_STATUS.PLAYING) {
+						currentDuration += 1000;
+
+						seekBarProcess.incrementProgressBy(1000);
+						textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
+					}
+				} else {
+					currentDuration = 0;
+
+					textViewCurrentDuration.setText("00:00");
+					seekBarProcess.setProgress(0);
+				}
 			}
 
 			imageButtonControl.setImageResource(controlDrawableId);
@@ -221,32 +231,28 @@ public class PlayActivity extends ActionBarActivity {
 	};
 
 	/**
-	 * 线程类，正在播放
+	 * TimerTask，輪詢用於檢測當前播放狀態currentPlayerStatus并發送消息給Handler供其處理）
 	 */
-	Runnable updateThreadPlaying = new Runnable() {
+	TimerTask taskTick = new TimerTask() {
 
 		@Override
 		public void run() {
 
 			Message m = handlerProcess.obtainMessage();
 
-			if (currentDuration <= seekBarProcess.getMax()) {
-				if (currentPlayerStatus == PLAYER_STATUS.PLAYING) {
-					currentDuration += 1000;
-					m.what = PLAYER_STATUS.PLAYING.getValue();
-
-					seekBarProcess.incrementProgressBy(1000);
-					textViewCurrentDuration.setText(musicHelper.getDuration(currentDuration));
-				}
-			} else {
-				currentDuration = 0;
+			switch (currentPlayerStatus) {
+			case PLAYING:
+				m.what = PLAYER_STATUS.PLAYING.getValue();
+				break;
+			case PAUSED:
+				m.what = PLAYER_STATUS.PAUSED.getValue();
+				break;
+			case STOPPED:
 				m.what = PLAYER_STATUS.STOPPED.getValue();
-
-				textViewCurrentDuration.setText("00:00");
-				seekBarProcess.setProgress(0);
+				break;
 			}
 
-			handlerProcess.handleMessage(m);
+			handlerProcess.sendMessage(m);
 		}
 	};
 
@@ -262,9 +268,6 @@ public class PlayActivity extends ActionBarActivity {
 		currentPlayerStatus = PLAYER_STATUS.PLAYING;
 		showAlbum();
 
-		handlerProcess.removeCallbacks(updateThreadPlaying);
-		handlerProcess.post(updateThreadPlaying);
-
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}
 
@@ -279,9 +282,6 @@ public class PlayActivity extends ActionBarActivity {
 
 		currentPlayerStatus = PLAYER_STATUS.PLAYING;
 		showAlbum();
-
-		handlerProcess.removeCallbacks(updateThreadPlaying);
-		handlerProcess.post(updateThreadPlaying);
 
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
 	}
@@ -300,23 +300,17 @@ public class PlayActivity extends ActionBarActivity {
 			switch (view.getId()) {
 			case R.id.imageButtonControl: {
 
-				Message m = handlerProcess.obtainMessage();
 				switch (currentPlayerStatus) {
 				case PLAYING:
 					currentPlayerStatus = PLAYER_STATUS.PAUSED;
-					m.what = PLAYER_STATUS.PAUSED.getValue();
 					break;
 				case PAUSED:
 					currentPlayerStatus = PLAYER_STATUS.PLAYING;
-					m.what = PLAYER_STATUS.PLAYING.getValue();
 					break;
 				case STOPPED:
 					currentPlayerStatus = PLAYER_STATUS.PLAYING;
-					m.what = PLAYER_STATUS.PLAYING.getValue();
 					break;
 				}
-
-				handlerProcess.handleMessage(m);
 			}
 				break;
 			case R.id.imageButtonPrevious: {

@@ -2,14 +2,11 @@ package com.service.audio;
 
 import java.io.IOException;
 import java.util.HashMap;
-
 import android.app.Service;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnCompletionListener;
 import android.os.IBinder;
-import android.util.Log;
-
 import com.lison.musicplayer.MainActivity;
 import com.lison.musicplayer.PlayActivity;
 import com.lison.musicplayer.PlayerConstant;
