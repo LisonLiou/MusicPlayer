@@ -72,10 +72,12 @@ public class MusicProvider {
 
 		MusicHelper musicHelper = new MusicHelper(_context);
 		ArrayList<HashMap<String, Object>> hashMusicList = new ArrayList<HashMap<String, Object>>();
+
 		while (cursor.moveToNext()) {
 
 			HashMap<String, Object> hash1 = new HashMap<String, Object>();
-			hash1.put("_id", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+			int id = Integer.parseInt(cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media._ID)));
+			hash1.put("_id", id);
 			hash1.put("title", cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE)));
 			int duration = cursor.getInt(cursor.getColumnIndex(MediaStore.Audio.Media.DURATION));
 			hash1.put("duration", musicHelper.getDuration(duration));
@@ -98,6 +100,7 @@ public class MusicProvider {
 			hash1.put("albumCover", albumCover);
 
 			hashMusicList.add(hash1);
+			MainActivity.currentMusicIndexQueue.add(id);
 		}
 
 		return hashMusicList;

@@ -18,4 +18,22 @@ public class PlayerConstant {
 			return this.value;
 		}
 	}
+
+	/**
+	 * 循环方式
+	 * 
+	 * @author Administrator
+	 * 
+	 */
+	public static enum ROUND_MODE {
+
+		// 单曲
+		SINGLE,
+
+		// 全部
+		WHOLE,
+
+		// 随机
+		RANDOM
+	}
 }

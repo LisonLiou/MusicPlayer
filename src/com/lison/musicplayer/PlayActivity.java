@@ -23,6 +23,7 @@ import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
 
 import com.lison.musicplayer.PlayerConstant.PLAYER_STATUS;
+import com.lison.musicplayer.PlayerConstant.ROUND_MODE;
 import com.service.audio.PlayerService;
 import com.utils.common.MusicHelper;
 
@@ -53,6 +54,11 @@ public class PlayActivity extends ActionBarActivity {
 	 * 当前播放器状态
 	 */
 	public static PLAYER_STATUS currentPlayerStatus = null;
+
+	/**
+	 * 当前歌曲循环方式（默认设置为全部播放）
+	 */
+	public static ROUND_MODE currentRoundMode = ROUND_MODE.WHOLE;
 
 	// 设置timer为守护进程（輪詢查看currentPlayerStatus并給Handler發送消息供其處理）
 	Timer timer = new Timer(true);
@@ -266,6 +272,7 @@ public class PlayActivity extends ActionBarActivity {
 		}
 
 		currentPlayerStatus = PLAYER_STATUS.PLAYING;
+		handlerProcess.sendEmptyMessage(currentPlayerStatus.getValue());
 		showAlbum();
 
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
@@ -281,6 +288,7 @@ public class PlayActivity extends ActionBarActivity {
 		}
 
 		currentPlayerStatus = PLAYER_STATUS.PLAYING;
+		handlerProcess.sendEmptyMessage(currentPlayerStatus.getValue());
 		showAlbum();
 
 		MainActivity.play(PlayActivity.this, PlayActivity.this, PLAYER_STATUS.PLAYING.getValue());
@@ -303,12 +311,15 @@ public class PlayActivity extends ActionBarActivity {
 				switch (currentPlayerStatus) {
 				case PLAYING:
 					currentPlayerStatus = PLAYER_STATUS.PAUSED;
+					handlerProcess.sendEmptyMessage(currentPlayerStatus.getValue());
 					break;
 				case PAUSED:
 					currentPlayerStatus = PLAYER_STATUS.PLAYING;
+					handlerProcess.sendEmptyMessage(currentPlayerStatus.getValue());
 					break;
 				case STOPPED:
 					currentPlayerStatus = PLAYER_STATUS.PLAYING;
+					handlerProcess.sendEmptyMessage(currentPlayerStatus.getValue());
 					break;
 				}
 			}

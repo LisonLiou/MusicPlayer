@@ -27,6 +27,9 @@ public class MainActivity extends ActionBarActivity {
 	// ArrayList文件列表对象（数据源：当前）
 	public static ArrayList<HashMap<String, Object>> hashMusicList = new ArrayList<HashMap<String, Object>>();
 
+	// 當前播放音樂的索引隊列
+	public static ArrayList<Integer> currentMusicIndexQueue = new ArrayList<Integer>();
+
 	// 当前播放的音乐索引
 	public static int currentMusicListIndex = 0;
 
