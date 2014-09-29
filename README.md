@@ -30,5 +30,5 @@ http://blog.csdn.net/onerain88/article/details/6434208
 
 12.[已完成][UI]为MainActivity音乐列表界面加入图片原型遮罩层(还有点瑕疵)
 
-
+13.[func]歌词部分参考地址：http://www.marschen.com/forum.php?mod=viewthread&tid=23786
 
