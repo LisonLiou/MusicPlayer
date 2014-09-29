@@ -100,7 +100,6 @@ public class MusicProvider {
 			hash1.put("albumCover", albumCover);
 
 			hashMusicList.add(hash1);
-			MainActivity.currentMusicIndexQueue.add(id);
 		}
 
 		return hashMusicList;

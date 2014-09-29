@@ -36,7 +36,7 @@ public class PlayActivity extends ActionBarActivity {
 	private ImageView imageViewAlbumCover;
 
 	// 控制播放按钮
-	private ImageButton imageButtonControl, imageButtonPrevious, imageButtonNext;
+	private ImageButton imageButtonControl, imageButtonPrevious, imageButtonNext, imageButtonRound, imageButtonShuffler;
 
 	// 歌曲标题、专辑名称、演唱者、时长、當前已播放時長
 	private TextView textViewTitle, textViewAlbum, textViewArtist, textViewDuration, textViewCurrentDuration;
@@ -62,6 +62,9 @@ public class PlayActivity extends ActionBarActivity {
 
 	// 设置timer为守护进程（輪詢查看currentPlayerStatus并給Handler發送消息供其處理）
 	Timer timer = new Timer(true);
+
+	// 是否循环播放
+	public static Boolean RANDOM = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -109,6 +112,10 @@ public class PlayActivity extends ActionBarActivity {
 		imageButtonPrevious.setOnClickListener(new MyOnClickListener());
 		imageButtonNext = (ImageButton) super.findViewById(R.id.imageButtonNext);
 		imageButtonNext.setOnClickListener(new MyOnClickListener());
+		imageButtonRound = (ImageButton) super.findViewById(R.id.imageButtonRound);
+		imageButtonRound.setOnClickListener(new MyOnClickListener());
+		imageButtonShuffler = (ImageButton) super.findViewById(R.id.imageButtonShuffler);
+		imageButtonShuffler.setOnClickListener(new MyOnClickListener());
 
 		// 设置播放器状态为正在播放（默认启动当前Activity就开始播放）
 		currentPlayerStatus = PLAYER_STATUS.PLAYING;
@@ -264,11 +271,31 @@ public class PlayActivity extends ActionBarActivity {
 
 	/**
 	 * 播放下一首
+	 * 
+	 * @param isComplete
 	 */
-	public void playNext() {
+	public void playNext(Boolean isComplete) {
 
-		if (++MainActivity.currentMusicListIndex > MainActivity.hashMusicList.size() - 1) {
-			MainActivity.currentMusicListIndex = 0;
+		int currentIndex = MainActivity.currentMusicIndexQueue.indexOf(MainActivity.currentMusicListIndex);
+		switch (currentRoundMode) {
+		case WHOLE:
+
+			if (++currentIndex > MainActivity.currentMusicIndexQueue.size() - 1) {
+				MainActivity.currentMusicListIndex = MainActivity.currentMusicIndexQueue.get(0);
+			} else {
+				MainActivity.currentMusicListIndex = MainActivity.currentMusicIndexQueue.get(currentIndex);
+			}
+			break;
+		case SINGLE:
+			if (!isComplete) {
+
+				if (++currentIndex > MainActivity.currentMusicIndexQueue.size() - 1) {
+					MainActivity.currentMusicListIndex = MainActivity.currentMusicIndexQueue.get(0);
+				} else {
+					MainActivity.currentMusicListIndex = MainActivity.currentMusicIndexQueue.get(currentIndex);
+				}
+			}
+			break;
 		}
 
 		currentPlayerStatus = PLAYER_STATUS.PLAYING;
@@ -280,11 +307,30 @@ public class PlayActivity extends ActionBarActivity {
 
 	/**
 	 * 播放上一首
+	 * 
+	 * @param isComplete
 	 */
-	public void playPrevious() {
+	public void playPrevious(Boolean isComplete) {
 
-		if (--MainActivity.currentMusicListIndex < 0) {
-			MainActivity.currentMusicListIndex = MainActivity.hashMusicList.size() - 1;
+		int currentIndex = MainActivity.currentMusicIndexQueue.indexOf(MainActivity.currentMusicListIndex);
+		switch (currentRoundMode) {
+		case WHOLE:
+
+			if (--currentIndex < 0) {
+				MainActivity.currentMusicListIndex = MainActivity.currentMusicIndexQueue.get(MainActivity.currentMusicIndexQueue.size() - 1);
+			} else {
+				MainActivity.currentMusicListIndex = MainActivity.currentMusicIndexQueue.get(currentIndex);
+			}
+			break;
+		case SINGLE:
+			if (!isComplete) {
+				if (--currentIndex < 0) {
+					MainActivity.currentMusicListIndex = MainActivity.currentMusicIndexQueue.get(MainActivity.currentMusicIndexQueue.size() - 1);
+				} else {
+					MainActivity.currentMusicListIndex = MainActivity.currentMusicIndexQueue.get(currentIndex);
+				}
+			}
+			break;
 		}
 
 		currentPlayerStatus = PLAYER_STATUS.PLAYING;
@@ -325,13 +371,39 @@ public class PlayActivity extends ActionBarActivity {
 			}
 				break;
 			case R.id.imageButtonPrevious: {
-				playPrevious();
+				playPrevious(false);
 				break;
 			}
 			case R.id.imageButtonNext: {
-				playNext();
+				playNext(false);
 				break;
 			}
+			case R.id.imageButtonRound:
+				switch (currentRoundMode) {
+				case WHOLE:
+					currentRoundMode = ROUND_MODE.SINGLE;
+					((ImageButton) view).setImageResource(R.drawable.music_player_round_one);
+					break;
+				case SINGLE:
+					currentRoundMode = ROUND_MODE.WHOLE;
+					((ImageButton) view).setImageResource(R.drawable.music_player_round_all);
+					break;
+				default:
+					break;
+				}
+				break;
+			case R.id.imageButtonShuffler:
+
+				if (RANDOM) {
+					((ImageButton) view).setImageResource(R.drawable.music_player_shuffler_inactive);
+				} else {
+					((ImageButton) view).setImageResource(R.drawable.music_player_shuffler_active);
+				}
+
+				RANDOM = !RANDOM;
+				MainActivity.Shuffle(RANDOM);
+
+				break;
 			}
 		}
 	}

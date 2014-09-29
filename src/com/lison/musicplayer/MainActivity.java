@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,8 +20,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.SimpleAdapter.ViewBinder;
+
 import com.content.provider.MusicProvider;
 import com.service.audio.PlayerService;
+import com.utils.common.GeneralHelper;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -49,6 +52,9 @@ public class MainActivity extends ActionBarActivity {
 
 		// 获取音乐文件列表
 		bindList();
+
+		// 初始化隨機/順序播放隊列
+		Shuffle(false);
 	}
 
 	/**
@@ -59,6 +65,34 @@ public class MainActivity extends ActionBarActivity {
 		actionBar = super.getSupportActionBar();
 
 		listViewMusic.setOnItemClickListener(new MyListViewOnItemClickListener());
+	}
+
+	/**
+	 * 随机组织音乐列表隊列
+	 */
+	public static void Shuffle(Boolean shuffle) {
+
+		currentMusicIndexQueue.clear();
+		int[] temp = new int[hashMusicList.size()];
+
+		for (int i = 0; i < hashMusicList.size(); i++) {
+			temp[i] = i;
+		}
+
+		if (shuffle) // 随机排序
+		{
+			for (int i : GeneralHelper.getRandomList((temp))) {
+				currentMusicIndexQueue.add(i);
+			}
+		} else {
+			for (int i = 0; i < hashMusicList.size(); i++) {
+				currentMusicIndexQueue.add(i);
+			}
+		}
+
+		for (int i : currentMusicIndexQueue) {
+			Log.i("Shuffle---------->", String.valueOf(i));
+		}
 	}
 
 	/**

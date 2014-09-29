@@ -31,9 +31,6 @@ public class PlayerConstant {
 		SINGLE,
 
 		// 全部
-		WHOLE,
-
-		// 随机
-		RANDOM
+		WHOLE
 	}
 }

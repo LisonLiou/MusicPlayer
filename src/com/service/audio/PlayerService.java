@@ -46,7 +46,7 @@ public class PlayerService extends Service implements Runnable {
 
 			@Override
 			public void onCompletion(MediaPlayer mp) {
-				playActivity.playNext();
+				playActivity.playNext(true);
 			}
 		});
 	}
