@@ -32,3 +32,4 @@ http://blog.csdn.net/onerain88/article/details/6434208
 
 13.[func]歌词部分参考地址：http://www.marschen.com/forum.php?mod=viewthread&tid=23786
 
+14.[func]歌词开源控件参考：http://www.oschina.net/p/openlrc
