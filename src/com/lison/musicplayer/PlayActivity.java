@@ -1,6 +1,5 @@
 package com.lison.musicplayer;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -29,8 +28,6 @@ import com.lison.musicplayer.PlayerConstant.PLAYER_STATUS;
 import com.lison.musicplayer.PlayerConstant.ROUND_MODE;
 import com.service.audio.PlayerService;
 import com.utils.common.MusicHelper;
-import com.widget.custom.LrcBuilder;
-import com.widget.custom.LrcTextView;
 
 public class PlayActivity extends ActionBarActivity {
 
@@ -45,8 +42,6 @@ public class PlayActivity extends ActionBarActivity {
 
 	// 歌曲标题、专辑名称、演唱者、时长、當前已播放時長，歌词显示控件
 	private TextView textViewTitle, textViewAlbum, textViewArtist, textViewDuration, textViewCurrentDuration, textViewLrc;
-
-	private LrcTextView textViewLrcCustom;
 
 	// SeekBar
 	private SeekBar seekBarProcess;
@@ -72,8 +67,6 @@ public class PlayActivity extends ActionBarActivity {
 
 	// 是否循环播放
 	public static Boolean RANDOM = false;
-
-	private List mTimeList;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -140,8 +133,6 @@ public class PlayActivity extends ActionBarActivity {
 		textViewLrc = (TextView) super.findViewById(R.id.textViewLrc);
 		textViewLrc.setOnClickListener(new MyOnClickListener());
 
-		textViewLrcCustom = (LrcTextView) super.findViewById(R.id.textViewLrcCustom);
-
 		musicHelper = new MusicHelper(this);
 
 		seekBarProcess = (SeekBar) super.findViewById(R.id.seekBarProcess);
@@ -149,50 +140,6 @@ public class PlayActivity extends ActionBarActivity {
 		seekBarProcess.setOnSeekBarChangeListener(new MyOnSeekBarChangeListener());
 
 		showAlbum();
-
-		LrcBuilder lrcHandler = new LrcBuilder();
-		try {
-			lrcHandler.readLRC("/sdcard/download/1.lrc");
-			mTimeList = lrcHandler.getTime();
-
-		} catch (IllegalArgumentException e) {
-			e.printStackTrace();
-		} catch (SecurityException e) {
-			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			e.printStackTrace();
-		}
-		final Handler handler = new Handler();
-		new Thread(new Runnable() {
-			int i = 0;
-
-			@Override
-			public void run() {
-
-				while (PlayerService.mediaPlayer.isPlaying()) {
-					handler.post(new Runnable() {
-
-						@Override
-						public void run() {
-							textViewLrcCustom.invalidate();
-						}
-					});
-					try {
-						Thread.sleep(600);
-
-						// Thread.sleep(mTimeList.get(i + 1) -
-						// mTimeList.get(i));
-
-					} catch (InterruptedException e) {
-					}
-					i++;
-					if (i == mTimeList.size() - 1) {
-						break;
-					}
-				}
-			}
-		}).start();
-
 	}
 
 	/**
@@ -468,6 +415,7 @@ public class PlayActivity extends ActionBarActivity {
 
 				setAlphaForView(textViewLrc, 0.6f);
 				textViewLrc.bringToFront();
+				textViewLrc.setVisibility(View.VISIBLE);
 				break;
 			case R.id.textViewLrc:
 

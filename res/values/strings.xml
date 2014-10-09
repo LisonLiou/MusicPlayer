@@ -7,5 +7,6 @@
     <string name="action_options">Options</string>
     <string name="play_activity_title">Music Player</string>
     <string name="music_play_not_music_found">Illegal Media Path</string>
+    <string name="music_play_no_lrc">No lyrics file</string>
 
 </resources>
