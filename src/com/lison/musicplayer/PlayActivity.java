@@ -1,5 +1,9 @@
 package com.lison.musicplayer;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Timer;
@@ -10,9 +14,11 @@ import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,6 +34,7 @@ import com.lison.musicplayer.PlayerConstant.PLAYER_STATUS;
 import com.lison.musicplayer.PlayerConstant.ROUND_MODE;
 import com.service.audio.PlayerService;
 import com.utils.common.MusicHelper;
+import com.widget.custom.LrcTextView;
 
 public class PlayActivity extends ActionBarActivity {
 
@@ -40,8 +47,11 @@ public class PlayActivity extends ActionBarActivity {
 	// 控制播放按钮
 	private ImageButton imageButtonControl, imageButtonPrevious, imageButtonNext, imageButtonRound, imageButtonShuffler;
 
-	// 歌曲标题、专辑名称、演唱者、时长、當前已播放時長，歌词显示控件
-	private TextView textViewTitle, textViewAlbum, textViewArtist, textViewDuration, textViewCurrentDuration, textViewLrc;
+	// 歌曲标题、专辑名称、演唱者、时长、當前已播放時長
+	private TextView textViewTitle, textViewAlbum, textViewArtist, textViewDuration, textViewCurrentDuration;
+
+	// 歌词显示控件
+	private LrcTextView textViewLrc;
 
 	// SeekBar
 	private SeekBar seekBarProcess;
@@ -67,6 +77,11 @@ public class PlayActivity extends ActionBarActivity {
 
 	// 是否循环播放
 	public static Boolean RANDOM = false;
+
+	// 前当前时间，用于对比歌词显示
+	private String preCurrentDate = null;
+	private SimpleDateFormat dateFormatter = null;
+	private List<String> lrcTimes;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -98,7 +113,12 @@ public class PlayActivity extends ActionBarActivity {
 	/**
 	 * 初始Activity逻辑
 	 */
+	@SuppressLint("SimpleDateFormat")
 	void initView() {
+
+		dateFormatter = new SimpleDateFormat("mm:ss:SS");// 设置日期格式
+		preCurrentDate = dateFormatter.format(new Date());// new Date()为获取当前系统时间
+
 		// 獲得当前acitonBar
 		actionBar = super.getSupportActionBar();
 		// 设置是否显示应用程序的图标
@@ -130,8 +150,14 @@ public class PlayActivity extends ActionBarActivity {
 		textViewArtist = (TextView) super.findViewById(R.id.textViewArtist);
 		textViewDuration = (TextView) super.findViewById(R.id.textViewDuration);
 		textViewCurrentDuration = (TextView) super.findViewById(R.id.textViewCurrentDuration);
-		textViewLrc = (TextView) super.findViewById(R.id.textViewLrc);
+		textViewLrc = (LrcTextView) super.findViewById(R.id.textViewLrc);
 		textViewLrc.setOnClickListener(new MyOnClickListener());
+
+		textViewLrc.setList(loadLrc());
+		// textViewLrc.updateUI();
+		lrcTimes = loadLrcTimes();
+
+		timer.schedule(taskScrollLrc, 0, 1);
 
 		musicHelper = new MusicHelper(this);
 
@@ -140,6 +166,121 @@ public class PlayActivity extends ActionBarActivity {
 		seekBarProcess.setOnSeekBarChangeListener(new MyOnSeekBarChangeListener());
 
 		showAlbum();
+	}
+
+	TimerTask taskScrollLrc = new TimerTask() {
+
+		@Override
+		public void run() {
+			String currentDate = dateFormatter.format(new Date());// newDate()为获取当前系统时间
+			try {
+				Date d1;
+				d1 = dateFormatter.parse(currentDate);
+				Date d2 = dateFormatter.parse(preCurrentDate);
+
+				//Log.i("minus------------------------>", dateFormatter.format(d1.getTime() - d2.getTime()));
+
+				if (lrcTimes.contains(dateFormatter.format((d1.getTime() - d2.getTime())))) {
+					Message m = textViewLrc.handler.obtainMessage();
+					m.what = 1;
+					textViewLrc.handler.handleMessage(m);
+				}
+
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+	};
+
+	/**
+	 * 
+	 * @return
+	 */
+	List<String> loadLrcTimes() {
+		List<String> times = new ArrayList<String>();
+
+		times.add("00:02:85");
+		times.add("00:04:93");
+		times.add("00:06:92");
+		times.add("00:11:58");
+		times.add("00:16:12");
+		times.add("00:20:84");
+		times.add("00:26:08");
+		times.add("00:31:08");
+		times.add("00:36:13");
+		times.add("00:41:00");
+		times.add("00:45:94");
+		times.add("00:51:12");
+		times.add("00:55:69");
+		times.add("01:00:74");
+		times.add("01:05:64");
+		times.add("01:09:09");
+		times.add("01:20:56");
+		times.add("01:25:47");
+		times.add("01:30:38");
+		times.add("01:35:35");
+		times.add("01:40:24");
+		times.add("01:45:45");
+		times.add("01:50:30");
+		times.add("01:55:14");
+		times.add("01:58:39");
+		times.add("02:00:14");
+		times.add("02:05:05");
+		times.add("02:08:74");
+
+		return times;
+	}
+
+	/**
+	 * 根据歌曲名字及演唱者查找歌词（先写个静态的）
+	 * 
+	 * @return
+	 */
+	List<String> loadLrc() {
+		List<String> list = new ArrayList<String>();
+
+		list.add("骊歌");
+		list.add("演唱：Gala");
+
+		list.add("当这一切都结束");
+		list.add("你是否失落");
+		list.add("当我随烟云消散");
+		list.add("谁为我难过");
+		list.add("没有不散的伴侣");
+		list.add("你要走下去");
+		list.add("没有不终的旋律");
+		list.add("但我会继续");
+		list.add("倘若有天想起我");
+		list.add("你蓦然寂寞");
+		list.add("人生是一场错过");
+		list.add("愿你别蹉跎");
+
+		list.add("当这一切已结束");
+		list.add("请不要失落");
+		list.add("我将随烟云消散");
+		list.add("别为我难过");
+		list.add("千言万语不必说");
+		list.add("只有一首歌");
+		list.add("都知欢聚最难得");
+		list.add("难奈别离多");
+
+		list.add("都知欢聚最难得");
+		list.add("难奈别离多");
+
+		return list;
+	}
+
+	/**
+	 * 根据歌曲名字及演唱者查找歌词（先写个静态的）
+	 * 
+	 * @return
+	 */
+	String loadLrc(String songName, String artist) {
+		return "[00:02.85]骊歌" + "[00:04.93]演唱：Gala" + "[00:06.92]" + "[00:11.58]当这一切都结束" + "[00:16.12]你是否失落" + "[00:20.84]当我随烟云消散" + "[00:26.08]谁为我难过"
+				+ "[00:31.08]没有不散的伴侣" + "[00:36.13]你要走下去" + "[00:41.00]没有不终的旋律" + "[00:45.94]但我会继续" + "[00:51.12]倘若有天想起我" + "[00:55.69]你蓦然寂寞"
+				+ "[01:00.74]人生是一场错过" + "[01:05.64]愿你别蹉跎" + "[01:09.09]" + "[01:20.56]当这一切已结束" + "[01:25.47]请不要失落" + "[01:30.38]我将随烟云消散" + "[01:35.35]别为我难过"
+				+ "[01:40.24]千言万语不必说" + "[01:45.45]只有一首歌" + "[01:50.30]都知欢聚最难得" + "[01:55.14]难奈别离多" + "[01:58.39]" + "[02:00.14]都知欢聚最难得" + "[02:05.05]难奈别离多"
+				+ "[02:08.74]";
 	}
 
 	/**
@@ -226,6 +367,10 @@ public class PlayActivity extends ActionBarActivity {
 			} else if (msg.what == PLAYER_STATUS.PAUSED.getValue()) {
 				controlDrawableId = R.drawable.music_player_control_play;
 				PlayerService.mediaPlayer.pause();
+			} else if (msg.what == 111) {
+				// 滚动歌词
+
+				// this.post(r)
 			} else {
 				controlDrawableId = R.drawable.music_player_control_pause;
 				PlayerService.mediaPlayer.start();

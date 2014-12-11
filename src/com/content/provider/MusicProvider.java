@@ -20,7 +20,8 @@ public class MusicProvider {
 	public static final Uri MUSIC_CONTENT_URI = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 
 	// 音乐列表默认where条件
-	public static final String MUSIC_LIST_WHERE_CONDITION_DEFAULT = "mime_type in ('audio/mpeg','audio/x-ms-wma') and bucket_display_name <> 'audio' and is_music > 0 ";
+	//public static final String MUSIC_LIST_WHERE_CONDITION_DEFAULT = "mime_type in ('audio/mpeg','audio/x-ms-wma') and bucket_display_name <> 'audio' and is_music > 0 ";
+	public static final String MUSIC_LIST_WHERE_CONDITION_DEFAULT = "mime_type in ('audio/mpeg','audio/x-ms-wma') and is_music > 0 ";
 
 	// 音乐列表默认数据源列
 	public static final String[] MUSIC_LIST_SOURCE_COLUMN_DEFAULT = { MediaStore.Audio.Media.TITLE, MediaStore.Audio.Media.DURATION,

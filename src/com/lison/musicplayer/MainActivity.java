@@ -153,7 +153,7 @@ public class MainActivity extends ActionBarActivity {
 
 		MusicProvider musicProvider = new MusicProvider(this);
 		hashMusicList = musicProvider.getAllMusic();
-
+		
 		int[] displayControls = { 0, R.id.textViewMusicTitle, R.id.textViewMusicDuration, 0, R.id.textViewMusicAuthor, R.id.textViewAlbumName,
 				R.id.textViewFileDisplayName, R.id.textViewFileAbsolutePath, R.id.roundImageViewAlbumCover, 0 };
 
