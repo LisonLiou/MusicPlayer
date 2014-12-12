@@ -153,11 +153,12 @@ public class PlayActivity extends ActionBarActivity {
 		textViewLrc = (LrcTextView) super.findViewById(R.id.textViewLrc);
 		textViewLrc.setOnClickListener(new MyOnClickListener());
 
-		textViewLrc.setList(loadLrc());
-		// textViewLrc.updateUI();
+		textViewLrc.setTextList(loadLrc());
 		lrcTimes = loadLrcTimes();
+		textViewLrc.setTimeList(lrcTimes);
+		textViewLrc.updateUI();
 
-		timer.schedule(taskScrollLrc, 0, 1);
+		// timer.schedule(taskScrollLrc, 0, 1);
 
 		musicHelper = new MusicHelper(this);
 
@@ -178,7 +179,8 @@ public class PlayActivity extends ActionBarActivity {
 				d1 = dateFormatter.parse(currentDate);
 				Date d2 = dateFormatter.parse(preCurrentDate);
 
-				//Log.i("minus------------------------>", dateFormatter.format(d1.getTime() - d2.getTime()));
+				// Log.i("minus------------------------>",
+				// dateFormatter.format(d1.getTime() - d2.getTime()));
 
 				if (lrcTimes.contains(dateFormatter.format((d1.getTime() - d2.getTime())))) {
 					Message m = textViewLrc.handler.obtainMessage();

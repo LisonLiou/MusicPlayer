@@ -1,6 +1,9 @@
 package com.widget.custom;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import android.annotation.SuppressLint;
@@ -49,10 +52,11 @@ public class LrcTextView extends TextView {
 	}
 
 	private void init() {
+
 		setFocusable(true);
-		if (mList == null) {
-			mList = new ArrayList<String>();
-			mList.add(0, "什么都木有啊");
+		if (mTextList == null) {
+			mTextList = new ArrayList<String>();
+			mTextList.add(0, "什么都木有啊");
 		}
 
 		// 非高亮部分
@@ -60,13 +64,13 @@ public class LrcTextView extends TextView {
 		// 打开抗锯齿
 		mPaint.setAntiAlias(true);
 		// 设置字体大小
-		mPaint.setTextSize(30);
+		mPaint.setTextSize(20);
 		// 文字对其方式
 		mPaint.setTextAlign(Paint.Align.CENTER);
 
 		// 高亮部分 当前歌词
 		mLightPaint = new Paint(mPaint);
-		mLightPaint.setColor(Color.RED);
+		mLightPaint.setColor(Color.WHITE);
 
 		float count = mPaint.getTextSize() * 2 / mDy;
 		mDf = 1.0 / count;
@@ -74,11 +78,11 @@ public class LrcTextView extends TextView {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		if (mList == null || mList.size() == 0) {
+		if (mTextList == null || mTextList.size() == 0) {
 			return;
 		}
 
-		int size = mList.size();
+		int size = mTextList.size();
 		int vHeight = getHeight();
 		int light = mLightIndex;
 		String text = null;
@@ -86,7 +90,7 @@ public class LrcTextView extends TextView {
 
 		for (int i = 0; i < size; i++) {
 			if (i != light) {
-				text = mList.get(i);
+				text = mTextList.get(i);
 				float y = vHeight / 2 + (i * 2) * mPaint.getTextSize() - mOffsetY;
 				canvas.drawText(text, lineLeft, y, mPaint);
 			}
@@ -94,14 +98,14 @@ public class LrcTextView extends TextView {
 
 		calcFloat();
 
-		text = mList.get(light);
+		text = mTextList.get(light);
 		float y = vHeight / 2 + (light * 2) * mPaint.getTextSize() - mOffsetY;
 
-		canvas.drawText(mList.get(light), lineLeft, y, mLightPaint);
+		canvas.drawText(mTextList.get(light), lineLeft, y, mLightPaint);
 
 		mOffsetY += mDy;
 
-		if (mOffsetY >= getHeight() / 2 + mList.size() * mPaint.getTextSize()) {
+		if (mOffsetY >= getHeight() / 2 + mTextList.size() * mPaint.getTextSize()) {
 			mOffsetY = 0;
 			mLightIndex = 0;
 		}
@@ -114,23 +118,35 @@ public class LrcTextView extends TextView {
 			mLightIndex++;
 			if (mLightIndex < 0) {
 				mLightIndex = 0;
-			} else if (mLightIndex >= mList.size()) {
-				mLightIndex = mList.size() - 1;
+			} else if (mLightIndex >= mTextList.size()) {
+				mLightIndex = mTextList.size() - 1;
 			}
 		}
 	}
 
-	private List<String> mList;
+	private List<String> mTextList;
 
-	public List<String> getList() {
-		return mList;
+	public List<String> getTextList() {
+		return mTextList;
 	}
 
-	public void setList(List<String> list) {
-		mList = list;
+	public void setTextList(List<String> list) {
+		mTextList = list;
+	}
+
+	private List<String> mTimeList;
+
+	public List<String> getTimeList() {
+		return mTimeList;
+	}
+
+	public void setTimeList(List<String> list) {
+		mTimeList = list;
 	}
 
 	public void updateUI() {
+		dateFormatter = new SimpleDateFormat("mm:ss:SS");// 设置日期格式
+		preCurrentDate = dateFormatter.format(new Date());// new Date()为获取当前系统时间
 		new Thread(new updateThread()).start();
 	}
 
@@ -152,13 +168,52 @@ public class LrcTextView extends TextView {
 		}
 	};
 
+	// 前当前时间，用于对比歌词显示
+	private String preCurrentDate = null;
+	private SimpleDateFormat dateFormatter = null;
+	int light = -1;
+
 	class updateThread implements Runnable {
 		public void run() {
 			while (true) {
+				String currentDate = dateFormatter.format(new Date());// newDate()为获取当前系统时间
+				Date d1;
+				Object obj = null;
+				try {
+					d1 = dateFormatter.parse(currentDate);
+					Date d2 = dateFormatter.parse(preCurrentDate);
+
+					obj = dateFormatter.format((d1.getTime() - d2.getTime()));
+					if (mTimeList.indexOf(obj) != -1) {
+						light = mTimeList.indexOf(obj);
+
+						Log.i("matched", obj.toString());
+					}
+
+					// Log.i("light========================>", obj.toString() +
+					// " " + lrcTimes.indexOf(obj) + " " + light + " ");
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+
+				//Log.i("matched=======================>", obj.toString());
+
 				postInvalidate();
 				try {
-					Thread.sleep(100);
+					if (obj != null) {
+
+						int mi = dateFormatter.parse(obj.toString()).getSeconds() * 1000;
+
+						//Log.i("matched=======================>", mi + "");
+						//Thread.sleep(mi);
+						
+						Thread.sleep(200);
+					}
+
 				} catch (InterruptedException e) {
+					e.printStackTrace();
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

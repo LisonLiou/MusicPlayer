@@ -5,7 +5,9 @@
     android:layout_gravity="center|top"
     android:orientation="vertical" >
 
-    <FrameLayout android:id="@+id/frameLayoutAlbumLrcContainer" >
+    <FrameLayout
+        android:id="@+id/frameLayoutAlbumLrcContainer"
+        android:layout_width="match_parent" >
 
         <!-- 將封面設置爲FrameLayout的背景，然後隻需要控制TextViewLrc的點擊次數1,2即可 -->
 
@@ -26,16 +28,14 @@
             android:background="#222222"
             android:gravity="center_horizontal|center_vertical"
             android:text="@string/music_play_no_lrc"
-            android:visibility="invisible" />
-        -->
-
-        <com.widget.custom.LrcTextView
+            android:visibility="invisible" />-->
+            
+                    <com.widget.custom.LrcTextView
             android:id="@+id/textViewLrc"
             android:layout_width="match_parent"
             android:layout_height="260dip"
-            android:layout_gravity="center_vertical"
             android:background="#222222"
-            android:gravity="center_horizontal|center_vertical"
+            android:gravity="center"
             android:text="@string/music_play_no_lrc"
             android:visibility="invisible" />
     </FrameLayout>
